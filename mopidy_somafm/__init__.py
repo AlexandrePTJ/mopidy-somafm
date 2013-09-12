@@ -21,7 +21,10 @@ class Extension(ext.Extension):
         return schema
 
     def validate_environment(self):
-        pass
+        try:
+            import requests
+        except ImportError as e:
+            raise ExtensionError('Library requests not found', e)
 
     def get_backend_classes(self):
         from .actor import SomaFMBackend

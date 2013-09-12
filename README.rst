@@ -18,6 +18,6 @@ Or install the Debian/Ubuntu package from `apt.mopidy.com
 Project resources
 -----------------
 
-- `Source code <https://github.com/mopidy/mopidy-somafm>`_
-- `Issue tracker <https://github.com/mopidy/mopidy-somafm/issues>`_
-- `Download development snapshot <https://github.com/mopidy/mopidy-somafm/tarball/develop#egg=Mopidy-SomaFM-dev>`_
+- `Source code <https://github.com/AlexandrePTJ/mopidy-somafm>`_
+- `Issue tracker <https://github.com/AlexandrePTJ/mopidy-somafm/issues>`_
+- `Download development snapshot <https://github.com/AlexandrePTJ/mopidy-somafm/tarball/develop#egg=Mopidy-SomaFM-dev>`_

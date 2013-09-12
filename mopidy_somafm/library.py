@@ -6,10 +6,10 @@ from mopidy.models import Playlist
 logger = logging.getLogger('mopidy.backends.somafm')
 
 
-class SomaFMPlaylistsProvider(base.BasePlaylistsProvider):
+class SomaFMLibraryProvider(base.BasePlaylistsProvider):
 
     def __init__(self, *args, **kwargs):
-        super(SomaFMPlaylistsProvider, self).__init__(*args, **kwargs)
+        super(SomaFMLibraryProvider, self).__init__(*args, **kwargs)
         self.refresh()
 
     def create(self, name):
