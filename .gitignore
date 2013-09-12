@@ -17,6 +17,7 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+include
 
 # Installer logs
 pip-log.txt
@@ -33,3 +34,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Sublime Text
+*.sublime*
