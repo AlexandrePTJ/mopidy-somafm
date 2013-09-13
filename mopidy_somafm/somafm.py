@@ -57,6 +57,8 @@ class SomaFMClient(object):
 
             if dmChannel.attributes.has_key('id'):
                 playlist_kwargs['uri'] = 'somafm:playlist:%s' % dmChannel.attributes['id'].nodeValue
+            else:
+                continue
 
             for childn in dmChannel.childNodes:
                 if childn.nodeType == minidom.Node.ELEMENT_NODE:
@@ -74,7 +76,9 @@ class SomaFMClient(object):
                         artist_kwargs['name'] = childn.firstChild.nodeValue
                         artist_kwargs['uri'] = 'somafm:artist:%s' % childn.firstChild.nodeValue
                     elif key == 'updated':
-                        playlist_kwargs['last_modified'] = datetime.datetime.fromtimestamp(int(childn.firstChild.nodeValue))
+                        pass
+                        # TODO: something to fix here
+                        #playlist_kwargs['last_modified'] = datetime.datetime.fromtimestamp(int(childn.firstChild.nodeValue))
                     elif 'pls' in key:
                         # extract pls file name without extension to create album name
                         plsURI = childn.firstChild.nodeValue
@@ -155,9 +159,13 @@ class SomaFMClient(object):
         for idx in range(1, numberofentries + 1):
             track_kwargs = {}
             track_kwargs['track_no'] = idx - 1
-            track_kwargs['uri'] = 'somafm:track:%s' % (parser.get('playlist', 'file%d' % idx))
+            track_kwargs['uri'] = parser.get('playlist', 'file%d' % idx)
             track_kwargs['name'] = parser.get('playlist', 'title%d' % idx)
             track_kwargs['length'] = - 1
             tracks_kwargs.append(track_kwargs)
 
         return tracks_kwargs
+
+# sfc = SomaFMClient()
+# sfc.refresh()
+# print sfc.playlists

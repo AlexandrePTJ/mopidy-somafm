@@ -30,7 +30,8 @@ class SomaFMPlaylistsProvider(base.BasePlaylistsProvider):
 
     def refresh(self):
         self.backend.somafm_client.refresh()
-        logger.info('Loaded %s SomaFM playlist(s)', len(self.backend.somafm_client.playlists))
+        self.playlists = self.backend.somafm_client.playlists
+        logger.info('Loaded %s SomaFM playlist(s)', len(self.playlists))
         listener.BackendListener.send('playlists_loaded')
 
     def save(self, playlist):
