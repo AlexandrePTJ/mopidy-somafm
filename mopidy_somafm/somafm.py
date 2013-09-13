@@ -30,6 +30,7 @@ class SomaFMClient(object):
         self.albums = []
         self.tracks = []
         self.playlists = []
+        self.http_client = requests.Session()
 
     def refresh(self):
         # clean previous data
@@ -37,7 +38,7 @@ class SomaFMClient(object):
         self.tracks[:] = []
         self.playlists[:] = []
 
-        r = requests.get(self.CHANNELS_URI)
+        r = self.http_client.get(self.CHANNELS_URI)
         logger.debug("Get %s : %d", self.CHANNELS_URI, r.status_code)
 
         if r.status_code is not 200:
@@ -122,7 +123,7 @@ class SomaFMClient(object):
 
     def parsePls(self, plsURI):
         # download pls
-        r = requests.get(plsURI)
+        r = self.http_client.get(plsURI)
         logger.debug("Get %s : %d", plsURI, r.status_code)
 
         if r.status_code is not 200:
