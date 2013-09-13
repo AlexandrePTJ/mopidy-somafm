@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import logging
+
 from mopidy.backends import base, listener
 from mopidy.models import Playlist
 
@@ -13,16 +15,24 @@ class SomaFMPlaylistsProvider(base.BasePlaylistsProvider):
         self.refresh()
 
     def create(self, name):
+        # Not applicable
         pass
 
     def delete(self, uri):
+        # Not applicable
         pass
 
     def lookup(self, uri):
-        pass
+        for playlist in self.backend.somafm_client.playlists:
+            if playlist.uri == uri:
+                return playlist
+        return None
 
     def refresh(self):
-        pass
+        self.backend.somafm_client.refresh()
+        logger.info('Loaded %s SomaFM playlist(s)', len(self.backend.somafm_client.playlists))
+        listener.BackendListener.send('playlists_loaded')
 
     def save(self, playlist):
+        # Not applicable
         pass

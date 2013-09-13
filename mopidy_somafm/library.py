@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import logging
+
 from mopidy.backends import base, listener
 from mopidy.models import Playlist
 
@@ -10,12 +12,8 @@ class SomaFMLibraryProvider(base.BasePlaylistsProvider):
 
     def __init__(self, *args, **kwargs):
         super(SomaFMLibraryProvider, self).__init__(*args, **kwargs)
-        self.refresh()
 
-    def create(self, name):
-        pass
-
-    def delete(self, uri):
+    def find_exact(self, query, uris):
         pass
 
     def lookup(self, uri):
@@ -24,5 +22,5 @@ class SomaFMLibraryProvider(base.BasePlaylistsProvider):
     def refresh(self):
         pass
 
-    def save(self, playlist):
+    def search(self, query, uris):
         pass

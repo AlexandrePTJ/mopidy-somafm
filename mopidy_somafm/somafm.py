@@ -38,10 +38,10 @@ class SomaFMClient(object):
         self.playlists[:] = []
 
         r = requests.get(self.CHANNELS_URI)
-        logging.debug("Get %s : %d", self.CHANNELS_URI, r.status_code)
+        logger.debug("Get %s : %d", self.CHANNELS_URI, r.status_code)
 
         if r.status_code is not 200:
-            logging.error("SomaFM: %s is not reachable", self.CHANNELS_URI)
+            logger.error("SomaFM: %s is not reachable", self.CHANNELS_URI)
             return
 
         self.parseChannelsXml(minidom.parseString(r.text))
@@ -119,10 +119,10 @@ class SomaFMClient(object):
     def parsePls(self, plsURI):
         # download pls
         r = requests.get(plsURI)
-        logging.debug("Get %s : %d", plsURI, r.status_code)
+        logger.debug("Get %s : %d", plsURI, r.status_code)
 
         if r.status_code is not 200:
-            logging.error("SomaFM: %s is not reachable", plsURI)
+            logger.error("SomaFM: %s is not reachable", plsURI)
             return None
 
         # create temporary file because ConfigParser need a file
@@ -135,19 +135,19 @@ class SomaFMClient(object):
         try:
             parser.readfp(plsf)
         except ConfigParser.MissingSectionHeaderError:
-            logging.error("SomaFM: %s is not a valid PLS file", plsURI)
+            logger.error("SomaFM: %s is not a valid PLS file", plsURI)
 
         # close and delete temp file
         plsf.close()
 
         if not parser.has_section('playlist'):
-            logging.error("SomaFM: %s has no section 'playlist'", plsURI)
+            logger.error("SomaFM: %s has no section 'playlist'", plsURI)
             return None
 
         try:
             numberofentries = parser.getint('playlist', 'numberofentries')
         except (ConfigParser.NoOptionError, ValueError):
-            logging.error("SomaFM: %s contains invalid data", plsURI)
+            logger.error("SomaFM: %s contains invalid data", plsURI)
             return None
 
         tracks_kwargs = []
