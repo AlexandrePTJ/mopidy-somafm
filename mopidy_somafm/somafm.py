@@ -3,13 +3,16 @@
 
 from __future__ import unicode_literals
 
-from xml.dom import minidom
-
-import logging
-import requests
 import ConfigParser
 import datetime
+import errno
+import logging
+import os
+import os.path
+import requests
 import tempfile
+import urlparse
+from xml.dom import minidom
 
 from mopidy.models import Track, Artist, Album, Playlist
 
@@ -20,7 +23,6 @@ logger = logging.getLogger('mopidy.backends.somafm.client')
     PLS are albums
     PLS contents are tracks
 '''
-
 class SomaFMClient(object):
 
     CHANNELS_URI = "http://api.somafm.com/channels.xml"
@@ -31,6 +33,15 @@ class SomaFMClient(object):
         self.tracks = []
         self.playlists = []
         self.http_client = requests.Session()
+
+        # try to create cache directory to keep pls files
+        # if it fails, self.cache_dir will be set to 'None'
+        try:
+            self.cache_dir = tempfile.gettempdir() + "/mopidy_somafm"
+            os.mkdir(self.cache_dir)
+        except OSError, e:
+            if e.errno is not errno.EEXIST:
+                self.cache_dir = None
 
     def refresh(self):
         # clean previous data
@@ -56,10 +67,31 @@ class SomaFMClient(object):
             tracks_kwargs = {}
             images_uris = []
 
-            if dmChannel.attributes.has_key('id'):
+            if 'id' in dmChannel.attributes.keys():
                 playlist_kwargs['uri'] = 'somafm:playlist:%s' % dmChannel.attributes['id'].nodeValue
             else:
                 continue
+
+            # We need to have 'updated' value to be able to cache things
+            # but only if cache_dir is not 'None'
+            channel_updated = None
+            channel_pls_path = None
+            if self.cache_dir is not None:
+                for childn in dmChannel.childNodes:
+                    if childn.nodeType == minidom.Node.ELEMENT_NODE:
+                        if childn.nodeName == 'updated':
+                            channel_updated = childn.firstChild.nodeValue
+
+                if channel_updated is None:
+                    continue
+
+                # create temp directory to keep pls files
+                try:
+                    channel_pls_path = self.cache_dir + "/" + channel_updated
+                    os.mkdir(channel_pls_path)
+                except OSError, e:
+                    if e.errno is not errno.EEXIST:
+                        channel_pls_path = None
 
             for childn in dmChannel.childNodes:
                 if childn.nodeType == minidom.Node.ELEMENT_NODE:
@@ -76,17 +108,13 @@ class SomaFMClient(object):
                     elif key == 'dj':
                         artist_kwargs['name'] = childn.firstChild.nodeValue
                         artist_kwargs['uri'] = 'somafm:artist:%s' % childn.firstChild.nodeValue
-                    elif key == 'updated':
-                        pass
-                        # TODO: something to fix here
-                        #playlist_kwargs['last_modified'] = datetime.datetime.fromtimestamp(int(childn.firstChild.nodeValue))
                     elif 'pls' in key:
                         # extract pls file name without extension to create album name
                         plsURI = childn.firstChild.nodeValue
                         plsName = plsURI[plsURI.rfind('/') + 1:plsURI.rfind('.')]
 
                         # extract tracks infos
-                        tracks_kwargs[plsName] = self.parsePls(childn.firstChild.nodeValue)
+                        tracks_kwargs[plsName] = self.parsePls(childn.firstChild.nodeValue, channel_pls_path)
 
                         album_kws = {}
                         album_kws['name'] = plsName
@@ -121,19 +149,38 @@ class SomaFMClient(object):
             playlist = Playlist(**playlist_kwargs)
             self.playlists.append(playlist)
 
-    def parsePls(self, plsURI):
-        # download pls
-        r = self.http_client.get(plsURI)
-        logger.debug("Get %s : %d", plsURI, r.status_code)
+    def parsePls(self, plsURI, plsLocalDirPath):
 
-        if r.status_code is not 200:
-            logger.error("SomaFM: %s is not reachable", plsURI)
-            return None
+        # extract filename
+        o = urlparse.urlparse(plsURI)
+        plsFileName = o.path[o.path.rfind('/') + 1:]
 
-        # create temporary file because ConfigParser need a file
-        plsf = tempfile.NamedTemporaryFile()
-        plsf.write(r.text)
-        plsf.seek(0)
+        # download pls if needed
+        download_pls = True
+        if plsLocalDirPath is not None:
+            download_pls = not os.path.exists(plsLocalDirPath + "/" + plsFileName)
+
+        if download_pls:
+            r = self.http_client.get(plsURI)
+            logger.debug("Get %s : %d", plsURI, r.status_code)
+
+            if r.status_code is not 200:
+                logger.error("SomaFM: %s is not reachable", plsURI)
+                return None
+
+            # create temporary file or save to cache because ConfigParser need a file
+            if plsLocalDirPath:
+                with open(plsLocalDirPath + "/" + plsFileName, 'wb') as f:
+                    for chunk in r.iter_content():
+                        f.write(chunk)
+                plsf = open(plsLocalDirPath + "/" + plsFileName, 'r')
+            else:
+                plsf = tempfile.NamedTemporaryFile()
+                plsf.write(r.text)
+                plsf.seek(0)
+
+        else:
+            plsf = open(plsLocalDirPath + "/" + plsFileName, 'r')
 
         # parse it
         parser = ConfigParser.RawConfigParser()
@@ -166,7 +213,3 @@ class SomaFMClient(object):
             tracks_kwargs.append(track_kwargs)
 
         return tracks_kwargs
-
-# sfc = SomaFMClient()
-# sfc.refresh()
-# print sfc.playlists
