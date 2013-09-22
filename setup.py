@@ -18,7 +18,7 @@ setup(
     author='Alexandre Petitjean',
     author_email='alpetitjean@gmail.com',
     description='SomaFM extension for Mopidy',
-    long_description=open('README.rst').read(),
+    long_description=open('README.rst').read() + open('CHANGES.rst').read(),
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,

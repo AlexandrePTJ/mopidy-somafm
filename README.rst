@@ -11,6 +11,8 @@ Install by running::
 
     sudo pip install Mopidy-SomaFM
 
+This extension requires activation of 'stream' extension.
+
 
 Project resources
 -----------------
