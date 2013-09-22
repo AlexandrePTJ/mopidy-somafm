@@ -17,7 +17,10 @@ class SomaFMLibraryProvider(base.BasePlaylistsProvider):
         pass
 
     def lookup(self, uri):
-        pass
+        for playlist in self.backend.somafm_client.playlists:
+            if playlist.uri == uri:
+                return playlist.tracks
+        return None
 
     def refresh(self):
         pass
