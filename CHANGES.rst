@@ -1,6 +1,5 @@
-*********
 Changelog
-*********
+---------
 
 This changelog is used to track all major changes to Mopidy-SomaFM extension.
 
