@@ -14,25 +14,30 @@ import tempfile
 import urlparse
 from xml.dom import minidom
 
+from mopidy.backends import base, listener
 from mopidy.models import Track, Artist, Album, Playlist
 
 logger = logging.getLogger('mopidy.backends.somafm.client')
 
 '''
-    Channels are playlist
-    PLS are albums
-    PLS contents are tracks
+    Channels are playlist and Album
+    PLS are tracks
+    PLS contents for internal use
 '''
 class SomaFMClient(object):
 
     CHANNELS_URI = "http://api.somafm.com/channels.xml"
 
-    def __init__(self):
+    def __init__(self, backend):
         super(SomaFMClient, self).__init__()
         self.albums = []
         self.tracks = []
+        self.artists = []
         self.playlists = []
+
+        self.tracks_uris = {}
         self.http_client = requests.Session()
+        self.backend = backend
 
         # try to create cache directory to keep pls files
         # if it fails, self.cache_dir will be set to 'None'
@@ -43,10 +48,12 @@ class SomaFMClient(object):
             if e.errno is not errno.EEXIST:
                 self.cache_dir = None
 
+
     def refresh(self):
         # clean previous data
         self.albums[:] = []
         self.tracks[:] = []
+        self.artists[:] = []
         self.playlists[:] = []
 
         r = self.http_client.get(self.CHANNELS_URI)
@@ -56,19 +63,28 @@ class SomaFMClient(object):
             logger.error("SomaFM: %s is not reachable", self.CHANNELS_URI)
             return
 
-        self.parseChannelsXml(minidom.parseString(r.text))
+        self._parseChannelsXml(minidom.parseString(r.text))
 
-    def parseChannelsXml(self, domDocument):
+        # We are done
+        self.backend.playlists.playlists = self.playlists
+        logger.info('Loaded %s SomaFM playlist(s)', len(self.backend.playlists.playlists))
+        listener.BackendListener.send('playlists_loaded')
+
+
+    def getSomaStreamURL(self, track_key):
+        if track_key in self.tracks_uris:
+            return self.tracks_uris[track_key]
+        else:
+            return None
+
+
+    def _parseChannelsXml(self, domDocument):
         for dmChannel in domDocument.getElementsByTagName("channel"):
 
-            artist_kwargs = {}
-            albums_kwargs = []
-            playlist_kwargs = {}
-            tracks_kwargs = {}
-            images_uris = []
-
+            playlist_name  = None
+            playlist_title = None
             if 'id' in dmChannel.attributes.keys():
-                playlist_kwargs['uri'] = 'somafm:playlist:%s' % dmChannel.attributes['id'].nodeValue
+                playlist_name = dmChannel.attributes['id'].nodeValue
             else:
                 continue
 
@@ -93,6 +109,9 @@ class SomaFMClient(object):
                     if e.errno is not errno.EEXIST:
                         channel_pls_path = None
 
+            pls_content = {}
+            images_uris = []
+            dj_name = None
             for childn in dmChannel.childNodes:
                 if childn.nodeType == minidom.Node.ELEMENT_NODE:
                     key = childn.nodeName
@@ -102,54 +121,68 @@ class SomaFMClient(object):
                         continue
 
                     if key == 'title':
-                        playlist_kwargs['name'] = childn.firstChild.nodeValue
+                        playlist_title = childn.firstChild.nodeValue
                     elif 'image' in key:
                         images_uris.append(childn.firstChild.nodeValue)
                     elif key == 'dj':
-                        artist_kwargs['name'] = childn.firstChild.nodeValue
-                        artist_kwargs['uri'] = 'somafm:artist:%s' % childn.firstChild.nodeValue
+                        dj_name = childn.firstChild.nodeValue
                     elif 'pls' in key:
                         # extract pls file name without extension to create album name
                         plsURI = childn.firstChild.nodeValue
                         plsName = plsURI[plsURI.rfind('/') + 1:plsURI.rfind('.')]
 
                         # extract tracks infos
-                        tracks_kwargs[plsName] = self.parsePls(childn.firstChild.nodeValue, channel_pls_path)
+                        pls_content[plsName] = self._parsePls(childn.firstChild.nodeValue, channel_pls_path)
 
-                        album_kws = {}
-                        album_kws['name'] = plsName
-                        album_kws['uri'] = 'somafm:album:%s' % plsName
-                        albums_kwargs.append(album_kws)
+            # Transform channel_updated to mopidy date string format (YYYY-MM-DD)
+            mopidy_date = datetime.datetime.fromtimestamp(int(channel_updated)).strftime("%Y-%m-%d")
 
             # when all nodes and pls are parsed, it buils all models and links
+            artist_kwargs = {}
+            artist_kwargs['name'] = dj_name
             artist = Artist(**artist_kwargs)
+            pls_artists = [artist]
+            self.artists.append(artist)
 
-            album_dict = {}
-            for album_kw in albums_kwargs:
-                album_kw['artists'] = [artist]
-                album_kw['images'] = images_uris
-                album_kw['num_tracks'] = len(tracks_kwargs[album_kw['name']])
+            album_kwargs = {}
+            album_kwargs['uri'] = "somafm:album:%s" % playlist_name
+            album_kwargs['name'] = playlist_title
+            album_kwargs['artists'] = pls_artists
+            album_kwargs['num_tracks'] = len(pls_content)
+            album_kwargs['num_discs'] = 1
+            album_kwargs['date'] = mopidy_date
+            album_kwargs['images'] = images_uris
+            album = Album(**album_kwargs)
+            self.albums.append(album)
 
-                # create Album and add to temp dict to assign into tracks
-                album = Album(**album_kw)
-                album_dict[album.name] = album
-                self.albums.append(album)
+            pls_tracks = []
+            track_no = 1
+            for pslkey in pls_content:
+                track_kwargs = {}
+                track_kwargs['uri'] = "somafm:track:%s" % pslkey
+                track_kwargs['name'] = pslkey
+                track_kwargs['artists'] = pls_artists
+                track_kwargs['album'] = album
+                track_kwargs['track_no'] = track_no
+                track_no = track_no + 1
+                track_kwargs['date'] = mopidy_date
 
-            tracks_list = []
-            for albumName in tracks_kwargs:
-                for track_kw in tracks_kwargs[albumName]:
-                    track_kw['album'] = album_dict[albumName]
-                    track_kw['artists'] = [artist]
+                track = Track(**track_kwargs)
+                pls_tracks.append(track)
+                self.tracks.append(track)
 
-                    track = Track(**track_kw)
-                    tracks_list.append(track)
-                    self.tracks.append(track)
+                self.tracks_uris[pslkey] = pls_content[pslkey]
 
-            playlist_kwargs['tracks'] = tracks_list
+            playlist_kwargs = {}
+            playlist_kwargs['uri'] = "somafm:playlist:%s" % playlist_name
+            playlist_kwargs['name'] = playlist_title
+            playlist_kwargs['last_modified'] = mopidy_date
+            playlist_kwargs['tracks'] = pls_tracks
             playlist = Playlist(**playlist_kwargs)
             self.playlists.append(playlist)
 
-    def parsePls(self, plsURI, plsLocalDirPath):
+
+    def _parsePls(self, plsURI, plsLocalDirPath):
 
         # extract filename
         o = urlparse.urlparse(plsURI)
@@ -202,14 +235,8 @@ class SomaFMClient(object):
             logger.error("SomaFM: %s contains invalid data", plsURI)
             return None
 
-        tracks_kwargs = []
-
+        tracks_uris = []
         for idx in range(1, numberofentries + 1):
-            track_kwargs = {}
-            track_kwargs['track_no'] = idx - 1
-            track_kwargs['uri'] = parser.get('playlist', 'file%d' % idx)
-            track_kwargs['name'] = parser.get('playlist', 'title%d' % idx)
-            track_kwargs['length'] = - 1
-            tracks_kwargs.append(track_kwargs)
+            tracks_uris.append(parser.get('playlist', 'file%d' % idx))
 
-        return tracks_kwargs
+        return tracks_uris
