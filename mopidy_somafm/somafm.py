@@ -28,7 +28,7 @@ class SomaFMClient(object):
 
     CHANNELS_URI = "http://api.somafm.com/channels.xml"
 
-    def __init__(self, backend):
+    def __init__(self, backend, proxy):
         super(SomaFMClient, self).__init__()
         self.albums = []
         self.tracks = []
@@ -36,8 +36,12 @@ class SomaFMClient(object):
         self.playlists = []
 
         self.tracks_uris = {}
-        self.http_client = requests.Session()
         self.backend = backend
+
+        self.http_client = requests.Session()
+        if proxy is not None:
+            r1 = urlparse.urlsplit(proxy)
+            self.http_client.proxies = {r1.scheme: proxy}
 
         # try to create cache directory to keep pls files
         # if it fails, self.cache_dir will be set to 'None'
