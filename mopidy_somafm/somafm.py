@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import ConfigParser
 import datetime
 import errno
+import io
 import logging
 import os
 import os.path
@@ -38,10 +39,10 @@ class SomaFMClient(object):
         self.tracks_uris = {}
         self.backend = backend
 
-        self.http_client = requests.Session()
+        self.proxies = None
         if proxy is not None:
             r1 = urlparse.urlsplit(proxy)
-            self.http_client.proxies = {r1.scheme: proxy}
+            self.proxies = {r1.scheme: proxy}
 
         # try to create cache directory to keep pls files
         # if it fails, self.cache_dir will be set to 'None'
@@ -60,14 +61,11 @@ class SomaFMClient(object):
         self.artists[:] = []
         self.playlists[:] = []
 
-        r = self.http_client.get(self.CHANNELS_URI)
-        logger.debug("Get %s : %d", self.CHANNELS_URI, r.status_code)
-
-        if r.status_code is not 200:
-            logger.error("SomaFM: %s is not reachable", self.CHANNELS_URI)
+        channels_content = self._downloadContent(self.CHANNELS_URI)
+        if channels_content is None:
             return
 
-        self._parseChannelsXml(minidom.parseString(r.text))
+        self._parseChannelsXml(minidom.parseString(channels_content))
 
         # We are done
         self.backend.playlists.playlists = self.playlists
@@ -80,6 +78,31 @@ class SomaFMClient(object):
             return self.tracks_uris[track_key]
         else:
             return None
+
+
+    def _downloadContent(self, url):
+        try:
+            r = requests.get(url, proxies=self.proxies)
+            logger.debug("SomaFM: Get %s : %i", url, r.status_code)
+
+            if r.status_code is not 200:
+                logger.error("SomaFM: %s is not reachable [http code:%i]", url, r.status_code)
+                return None
+
+        except requests.exceptions.RequestException, e:
+            logger.error("SomaFM RequestException: %s", e)
+        except requests.exceptions.ConnectionError, e:
+            logger.error("SomaFM ConnectionError: %s", e)
+        except requests.exceptions.URLRequired, e:
+            logger.error("SomaFM URLRequired: %s", e)
+        except requests.exceptions.TooManyRedirects, e:
+            logger.error("SomaFM TooManyRedirects: %s", e)
+        except Exception, e:
+            logger.error("SomaFM exception: %s", e)
+        else:
+            return r.text
+
+        return None
 
 
     def _parseChannelsXml(self, domDocument):
@@ -136,7 +159,13 @@ class SomaFMClient(object):
                         plsName = plsURI[plsURI.rfind('/') + 1:plsURI.rfind('.')]
 
                         # extract tracks infos
-                        pls_content[plsName] = self._parsePls(childn.firstChild.nodeValue, channel_pls_path)
+                        pls_tracks_uris = self._parsePls(childn.firstChild.nodeValue, channel_pls_path)
+                        if pls_tracks_uris is not None:
+                            pls_content[plsName] = pls_tracks_uris
+
+            # if nothing extracted, don't continue
+            if len(pls_content) is 0:
+                continue
 
             # Transform channel_updated to mopidy date string format (YYYY-MM-DD)
             mopidy_date = datetime.datetime.fromtimestamp(int(channel_updated)).strftime("%Y-%m-%d")
@@ -186,8 +215,7 @@ class SomaFMClient(object):
             self.playlists.append(playlist)
 
 
-    def _parsePls(self, plsURI, plsLocalDirPath):
-
+    def _getPlsContent(self, plsURI, plsLocalDirPath):
         # extract filename
         o = urlparse.urlparse(plsURI)
         plsFileName = o.path[o.path.rfind('/') + 1:]
@@ -198,36 +226,37 @@ class SomaFMClient(object):
             download_pls = not os.path.exists(plsLocalDirPath + "/" + plsFileName)
 
         if download_pls:
-            r = self.http_client.get(plsURI)
-            logger.debug("Get %s : %d", plsURI, r.status_code)
+            plsc = self._downloadContent(plsURI)
 
-            if r.status_code is not 200:
-                logger.error("SomaFM: %s is not reachable", plsURI)
+            if plsc is None:
                 return None
 
-            # create temporary file or save to cache because ConfigParser need a file
+            # save to local cache
             if plsLocalDirPath:
                 with open(plsLocalDirPath + "/" + plsFileName, 'wb') as f:
-                    for chunk in r.iter_content():
-                        f.write(chunk)
-                plsf = open(plsLocalDirPath + "/" + plsFileName, 'r')
-            else:
-                plsf = tempfile.NamedTemporaryFile()
-                plsf.write(r.text)
-                plsf.seek(0)
+                    f.write(plsc)
+                f.close()
 
+            return plsc
         else:
-            plsf = open(plsLocalDirPath + "/" + plsFileName, 'r')
+            with open(plsLocalDirPath + "/" + plsFileName, 'wb') as f:
+                plsc = f.read()
+            f.close()
+            return plsc
+
+
+    def _parsePls(self, plsURI, plsLocalDirPath):
+
+        plsc = self._getPlsContent(plsURI, plsLocalDirPath)
+        if plsc is None:
+            return None
 
         # parse it
         parser = ConfigParser.RawConfigParser()
         try:
-            parser.readfp(plsf)
+            parser.readfp(io.BytesIO(plsc))
         except ConfigParser.MissingSectionHeaderError:
             logger.error("SomaFM: %s is not a valid PLS file", plsURI)
-
-        # close and delete temp file
-        plsf.close()
 
         if not parser.has_section('playlist'):
             logger.error("SomaFM: %s has no section 'playlist'", plsURI)
@@ -235,7 +264,7 @@ class SomaFMClient(object):
 
         try:
             numberofentries = parser.getint('playlist', 'numberofentries')
-        except (ConfigParser.NoOptionError, ValueError):
+        except ConfigParser.NoOptionError, ValueError:
             logger.error("SomaFM: %s contains invalid data", plsURI)
             return None
 
