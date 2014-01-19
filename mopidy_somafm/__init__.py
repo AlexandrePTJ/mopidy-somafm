@@ -2,9 +2,10 @@ from __future__ import unicode_literals
 
 import os
 
-from mopidy import config, exceptions, ext
+from mopidy import config, ext
 
 __version__ = '0.3.0'
+
 
 class Extension(ext.Extension):
 
@@ -19,12 +20,6 @@ class Extension(ext.Extension):
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
         return schema
-
-    def validate_environment(self):
-        try:
-            import requests
-        except ImportError as e:
-            raise ExtensionError('Library requests not found', e)
 
     def get_backend_classes(self):
         from .actor import SomaFMBackend
