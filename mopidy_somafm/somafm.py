@@ -15,7 +15,7 @@ import tempfile
 import urlparse
 from xml.dom import minidom
 
-from mopidy.backends import base, listener
+from mopidy import backend
 from mopidy.models import Track, Artist, Album, Playlist
 
 logger = logging.getLogger('mopidy.backends.somafm.client')
@@ -70,7 +70,7 @@ class SomaFMClient(object):
         # We are done
         self.backend.playlists.playlists = self.playlists
         logger.info('Loaded %s SomaFM playlist(s)', len(self.backend.playlists.playlists))
-        listener.BackendListener.send('playlists_loaded')
+        backend.BackendListener.send('playlists_loaded')
 
 
     def getSomaStreamURL(self, track_key):
