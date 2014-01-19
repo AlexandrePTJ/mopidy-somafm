@@ -25,14 +25,14 @@ def format_proxy(scheme, username, password, hostname, port):
 
         # with authentification
         if username and password:
-            return "%s://%s:%s@%s:%i" % (scheme, username, password, hostname, port)
+            return "%s://%s:%s@%s:%i" % (
+                scheme, username, password, hostname, port)
         # ... or without
         else:
             return "%s://%s:%i" % (scheme, hostname, port)
 
     else:
         return None
-
 
 
 class SomaFMBackend(pykka.ThreadingActor, backend.Backend):

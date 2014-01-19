@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 
 from mopidy import backend
-from mopidy.models import Playlist
 
 logger = logging.getLogger(__name__)
 
