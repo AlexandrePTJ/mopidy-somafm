@@ -10,7 +10,7 @@ from .library import SomaFMLibraryProvider
 from .playback import SomaFMPlaybackProvider
 from .somafm import SomaFMClient
 
-logger = logging.getLogger('mopidy.backends.somafm')
+logger = logging.getLogger(__name__)
 
 
 def format_proxy(scheme, username, password, hostname, port):

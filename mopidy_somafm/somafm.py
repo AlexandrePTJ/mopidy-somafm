@@ -18,7 +18,7 @@ from xml.dom import minidom
 from mopidy import backend
 from mopidy.models import Track, Artist, Album, Playlist
 
-logger = logging.getLogger('mopidy.backends.somafm.client')
+logger = logging.getLogger(__name__)
 
 '''
     Channels are playlist and Album

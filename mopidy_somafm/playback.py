@@ -5,7 +5,7 @@ import logging
 from mopidy import backend
 from mopidy.models import Playlist
 
-logger = logging.getLogger('mopidy.backends.somafm')
+logger = logging.getLogger(__name__)
 
 class SomaFMPlaybackProvider(backend.PlaybackProvider):
 
