@@ -21,6 +21,6 @@ class Extension(ext.Extension):
         schema = super(Extension, self).get_config_schema()
         return schema
 
-    def get_backend_classes(self):
+    def setup(self, registry):
         from .actor import SomaFMBackend
-        return [SomaFMBackend]
+        registry.add('backend', SomaFMBackend)
