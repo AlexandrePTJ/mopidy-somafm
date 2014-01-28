@@ -15,16 +15,18 @@ import tempfile
 import urlparse
 from xml.dom import minidom
 
-from mopidy.backends import base, listener
+from mopidy import backend
 from mopidy.models import Track, Artist, Album, Playlist
 
-logger = logging.getLogger('mopidy.backends.somafm.client')
+logger = logging.getLogger(__name__)
 
 '''
     Channels are playlist and Album
     PLS are tracks
     PLS contents for internal use
 '''
+
+
 class SomaFMClient(object):
 
     CHANNELS_URI = "http://api.somafm.com/channels.xml"
@@ -53,7 +55,6 @@ class SomaFMClient(object):
             if e.errno is not errno.EEXIST:
                 self.cache_dir = None
 
-
     def refresh(self):
         # clean previous data
         self.albums[:] = []
@@ -69,9 +70,10 @@ class SomaFMClient(object):
 
         # We are done
         self.backend.playlists.playlists = self.playlists
-        logger.info('Loaded %s SomaFM playlist(s)', len(self.backend.playlists.playlists))
-        listener.BackendListener.send('playlists_loaded')
-
+        logger.info(
+            'Loaded %s SomaFM playlist(s)',
+            len(self.backend.playlists.playlists))
+        backend.BackendListener.send('playlists_loaded')
 
     def getSomaStreamURL(self, track_key):
         if track_key in self.tracks_uris:
@@ -79,14 +81,15 @@ class SomaFMClient(object):
         else:
             return None
 
-
     def _downloadContent(self, url):
         try:
             r = requests.get(url, proxies=self.proxies)
             logger.debug("SomaFM: Get %s : %i", url, r.status_code)
 
             if r.status_code is not 200:
-                logger.error("SomaFM: %s is not reachable [http code:%i]", url, r.status_code)
+                logger.error(
+                    "SomaFM: %s is not reachable [http code:%i]",
+                    url, r.status_code)
                 return None
 
         except requests.exceptions.RequestException, e:
@@ -104,11 +107,10 @@ class SomaFMClient(object):
 
         return None
 
-
     def _parseChannelsXml(self, domDocument):
         for dmChannel in domDocument.getElementsByTagName("channel"):
 
-            playlist_name  = None
+            playlist_name = None
             playlist_title = None
             if 'id' in dmChannel.attributes.keys():
                 playlist_name = dmChannel.attributes['id'].nodeValue
@@ -154,12 +156,15 @@ class SomaFMClient(object):
                     elif key == 'dj':
                         dj_name = childn.firstChild.nodeValue
                     elif 'pls' in key:
-                        # extract pls file name without extension to create album name
+                        # extract pls file name without extension to create
+                        # album name
                         plsURI = childn.firstChild.nodeValue
-                        plsName = plsURI[plsURI.rfind('/') + 1:plsURI.rfind('.')]
+                        plsName = plsURI[
+                            plsURI.rfind('/') + 1:plsURI.rfind('.')]
 
                         # extract tracks infos
-                        pls_tracks_uris = self._parsePls(childn.firstChild.nodeValue, channel_pls_path)
+                        pls_tracks_uris = self._parsePls(
+                            childn.firstChild.nodeValue, channel_pls_path)
                         if pls_tracks_uris is not None:
                             pls_content[plsName] = pls_tracks_uris
 
@@ -167,8 +172,10 @@ class SomaFMClient(object):
             if len(pls_content) is 0:
                 continue
 
-            # Transform channel_updated to mopidy date string format (YYYY-MM-DD)
-            mopidy_date = datetime.datetime.fromtimestamp(int(channel_updated)).strftime("%Y-%m-%d")
+            # Transform channel_updated to mopidy date string format
+            # (YYYY-MM-DD)
+            mopidy_date = datetime.datetime.fromtimestamp(
+                int(channel_updated)).strftime("%Y-%m-%d")
 
             # when all nodes and pls are parsed, it buils all models and links
             artist_kwargs = {}
@@ -214,7 +221,6 @@ class SomaFMClient(object):
             playlist = Playlist(**playlist_kwargs)
             self.playlists.append(playlist)
 
-
     def _getPlsContent(self, plsURI, plsLocalDirPath):
         # extract filename
         o = urlparse.urlparse(plsURI)
@@ -223,7 +229,8 @@ class SomaFMClient(object):
         # download pls if needed
         download_pls = True
         if plsLocalDirPath is not None:
-            download_pls = not os.path.exists(plsLocalDirPath + "/" + plsFileName)
+            download_pls = not os.path.exists(
+                plsLocalDirPath + "/" + plsFileName)
 
         if download_pls:
             plsc = self._downloadContent(plsURI)
@@ -244,7 +251,6 @@ class SomaFMClient(object):
             f.close()
             return plsc
 
-
     def _parsePls(self, plsURI, plsLocalDirPath):
 
         plsc = self._getPlsContent(plsURI, plsLocalDirPath)
@@ -264,7 +270,7 @@ class SomaFMClient(object):
 
         try:
             numberofentries = parser.getint('playlist', 'numberofentries')
-        except ConfigParser.NoOptionError, ValueError:
+        except (ConfigParser.NoOptionError, ValueError):
             logger.error("SomaFM: %s contains invalid data", plsURI)
             return None
 

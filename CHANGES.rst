@@ -1,11 +1,10 @@
 Changelog
----------
+=========
 
-This changelog is used to track all major changes to Mopidy-SomaFM extension.
-
-v0.3.0 (unreleased)
+v0.3.0 (UNRELEASED)
 -------------------
 
+- Require Mopidy >= 0.18
 - Add proxy support for downloading SomaFM content
 - #1: handle 'requests' exceptions
 

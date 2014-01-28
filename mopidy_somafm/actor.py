@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 import logging
 import pykka
 
-from mopidy.backends import base
+from mopidy import backend
 
 from .playlists import SomaFMPlaylistsProvider
 from .library import SomaFMLibraryProvider
 from .playback import SomaFMPlaybackProvider
 from .somafm import SomaFMClient
 
-logger = logging.getLogger('mopidy.backends.somafm')
+logger = logging.getLogger(__name__)
 
 
 def format_proxy(scheme, username, password, hostname, port):
@@ -25,7 +25,8 @@ def format_proxy(scheme, username, password, hostname, port):
 
         # with authentification
         if username and password:
-            return "%s://%s:%s@%s:%i" % (scheme, username, password, hostname, port)
+            return "%s://%s:%s@%s:%i" % (
+                scheme, username, password, hostname, port)
         # ... or without
         else:
             return "%s://%s:%i" % (scheme, hostname, port)
@@ -34,8 +35,7 @@ def format_proxy(scheme, username, password, hostname, port):
         return None
 
 
-
-class SomaFMBackend(pykka.ThreadingActor, base.Backend):
+class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, config, audio):
         super(SomaFMBackend, self).__init__()
@@ -56,4 +56,4 @@ class SomaFMBackend(pykka.ThreadingActor, base.Backend):
         self.uri_schemes = ['somafm']
 
     def on_start(self):
-    	self.somafm_client.refresh()
+        self.somafm_client.refresh()

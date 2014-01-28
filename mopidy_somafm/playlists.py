@@ -2,13 +2,12 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy.backends import base
-from mopidy.models import Playlist
+from mopidy import backend
 
-logger = logging.getLogger('mopidy.backends.somafm')
+logger = logging.getLogger(__name__)
 
 
-class SomaFMPlaylistsProvider(base.BasePlaylistsProvider):
+class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
 
     def __init__(self, *args, **kwargs):
         super(SomaFMPlaylistsProvider, self).__init__(*args, **kwargs)
