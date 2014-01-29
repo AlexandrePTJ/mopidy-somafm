@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v0.3.0 (UNRELEASED)
+v0.3.0 (2014-01-29)
 -------------------
 
 - Require Mopidy >= 0.18
