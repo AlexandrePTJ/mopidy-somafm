@@ -7,7 +7,11 @@ import datetime
 import logging
 import requests
 import urlparse
-import xml.etree.ElementTree as ET
+
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +25,7 @@ logger = logging.getLogger(__name__)
 class SomaFMClient(object):
 
     CHANNELS_URI = "http://api.somafm.com/channels.xml"
-    channels_data = {}
+    channels = {}
     proxies = None
 
     def __init__(self, proxy=None):
@@ -31,16 +35,14 @@ class SomaFMClient(object):
             r1 = urlparse.urlsplit(proxy)
             self.proxies = {r1.scheme: proxy}
 
-    def channels(self):
-        return self.channels_data
-
     def refresh(self):
         # clean previous data
-        self.channels_data = {}
+        self.channels = {}
 
         # download channels xml file
         channels_content = self._downloadContent(self.CHANNELS_URI)
         if channels_content is None:
+            logger.error('Cannot fetch %s' % (self.CHANNELS_URI))
             return
 
         # parse XML
@@ -50,7 +52,7 @@ class SomaFMClient(object):
 
             playlist_name = child_channel.attrib['id']
 
-            self.channels_data[playlist_name] = {}
+            self.channels[playlist_name] = {}
             pls = {}
 
             for child_detail in child_channel:
@@ -58,10 +60,10 @@ class SomaFMClient(object):
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj']:
-                    self.channels_data[playlist_name][key] = val
+                if key in ['title', 'image', 'dj', 'genre']:
+                    self.channels[playlist_name][key] = val
                 elif key == 'updated':
-                    self.channels_data[playlist_name]['updated'] = datetime.datetime.fromtimestamp(
+                    self.channels[playlist_name]['updated'] = datetime.datetime.fromtimestamp(
                         int(val)).strftime("%Y-%m-%d")
                 elif 'pls' in key:
                     pls[key] = {}
@@ -70,7 +72,7 @@ class SomaFMClient(object):
                     # extract pls file name without extension to create album name
                     pls[key]['name'] = val[val.rfind('/') + 1:val.rfind('.')]
 
-            self.channels_data[playlist_name]['pls'] = pls
+            self.channels[playlist_name]['pls'] = pls
 
     def _downloadContent(self, url):
         try:

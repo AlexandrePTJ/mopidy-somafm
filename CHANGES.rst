@@ -7,6 +7,8 @@ v0.3.0 (UNRELEASED)
 - Require Mopidy >= 0.18
 - Add proxy support for downloading SomaFM content
 - #1: handle 'requests' exceptions
+- Use builtin Mopidy's .pls support
+- Internal code cleanup
 
 
 v0.2.0 (2013-09-22)
