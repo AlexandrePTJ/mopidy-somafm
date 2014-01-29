@@ -74,7 +74,7 @@ class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
         self.backend.somafm_client.refresh()
         for channel in self.backend.somafm_client.channels:
             playlist = Playlist(
-                uri='somafm://' +  channel,
+                uri='somafm://' + channel,
                 name=self.backend.somafm_client.channels[channel]['title'])
             playlists.append(playlist)
 
@@ -123,4 +123,3 @@ class SomaFMLibraryProvider(backend.PlaylistsProvider):
                     tracks.append(track)
                 return tracks
         return None
-
