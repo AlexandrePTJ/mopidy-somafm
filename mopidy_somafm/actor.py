@@ -11,19 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 def format_proxy(scheme, username, password, hostname, port):
-    ''' Format Proxy URL '''
+    # Format Proxy URL
     if hostname:
-        ''' scheme must exists, so if None is give, we set default to http '''
+        # scheme must exists, so if None is give, we set default to http
         if not scheme:
             scheme = "http"
-        ''' idem with port, default at 80 '''
+        # idem with port, default at 80
         if not port:
             port = 80
-        ''' with authentification '''
+        # with authentification
         if username and password:
             return "%s://%s:%s@%s:%i" % (
                 scheme, username, password, hostname, port)
-        ''' ... or without '''
+        # ... or without
         else:
             return "%s://%s:%i" % (scheme, hostname, port)
     else:
