@@ -51,9 +51,6 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
     def on_start(self):
         self.playlists.refresh()
 
-    def on_stop(self):
-        pass
-
 
 class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
 
@@ -86,12 +83,7 @@ class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
         pass
 
 
-class SomaFMLibraryProvider(backend.PlaylistsProvider):
-
-    root_directory = None
-
-    def search(self, query=None, uris=None):
-        pass
+class SomaFMLibraryProvider(backend.LibraryProvider):
 
     def lookup(self, uri):
         for playlist in self.backend.playlists.playlists:
