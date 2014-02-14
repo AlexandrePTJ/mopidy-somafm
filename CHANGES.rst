@@ -1,8 +1,15 @@
 Changelog
 =========
 
+v0.4.0 (UNRELEASED)
+-------------------
+
+- Add browse support for LibraryController
+
+
 v0.3.1 (2014-01-30)
 -------------------
+
 - #3: Correct wrong subclassing
 
 
