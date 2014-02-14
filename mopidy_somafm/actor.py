@@ -4,7 +4,7 @@ import logging
 import pykka
 
 from mopidy import backend
-from mopidy.models import Playlist, Album, Track, Artist
+from mopidy.models import Playlist, Album, Track, Artist, Ref
 from .somafm import SomaFMClient
 
 logger = logging.getLogger(__name__)
@@ -30,6 +30,26 @@ def format_proxy(scheme, username, password, hostname, port):
         return None
 
 
+'''
+URI Scheme is :
+    somafm:root => all playlists
+    somafm:channel:/<channel name> => Playlist with misc pls path
+    somafm:pls:/<channel name>/<pls name> => Track for browsing
+    somafm:track:/<channel name>/<pls name> => Track for playing
+'''
+
+
+def parse_uri(uri):
+    uri_split = uri.split(':', 3)
+    if len(uri_split) >= 2 and uri_split[0] == 'somafm':
+        sfmtype = uri_split[1]
+        path = ''
+        if len(uri_split) == 3:
+            path = uri_split[2][1:]
+        return sfmtype, path
+    return None, None
+
+
 class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, config, audio):
@@ -42,7 +62,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
             hostname=config['proxy']['hostname'],
             port=config['proxy']['port'])
 
-        self.somafm_client = SomaFMClient(proxy=full_proxy)
+        self.somafm = SomaFMClient(proxy=full_proxy)
         self.library = SomaFMLibraryProvider(backend=self)
         self.playlists = SomaFMPlaylistsProvider(backend=self)
 
@@ -68,11 +88,11 @@ class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
 
     def refresh(self):
         playlists = []
-        self.backend.somafm_client.refresh()
-        for channel in self.backend.somafm_client.channels:
+        self.backend.somafm.refresh()
+        for channel in self.backend.somafm.channels:
             playlist = Playlist(
-                uri='somafm://' + channel,
-                name=self.backend.somafm_client.channels[channel]['title'])
+                uri='somafm:channel:/' + channel,
+                name=self.backend.somafm.channels[channel]['title'])
             playlists.append(playlist)
 
         self.playlists = playlists
@@ -85,33 +105,96 @@ class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
 
 class SomaFMLibraryProvider(backend.LibraryProvider):
 
+    root_directory = Ref.directory(uri='somafm:root', name='Soma FM')
+
     def lookup(self, uri):
-        for playlist in self.backend.playlists.playlists:
-            if playlist.uri == uri:
-                channel_name = uri.replace('somafm://', '')
-                channel_data = self.backend.somafm_client.channels[channel_name]
 
-                ''' Artists '''
-                artist = Artist(name=channel_data['dj'])
+        sfmtype, path = parse_uri(uri)
+        if sfmtype is None:
+            logger.debug('Unknown URI: %s' % (uri))
+            return None
+        if sfmtype not in ('channel', 'pls', 'track'):
+            logger.debug('Unmanaged type: %s' % (sfmtype))
+            return None
 
-                ''' Build album (idem as playlist, but with more metada) '''
-                album = Album(
+        channel_name = ''
+        pls_name = ''
+        if sfmtype == 'channel':
+            channel_name = path
+        else:
+            path_split = path.split('/', 2)
+            channel_name = path_split[0]
+            pls_name = path_split[1]
+
+        channel_data = self.backend.somafm.channels[channel_name]
+
+        ''' Artists '''
+        artist = Artist(name=channel_data['dj'])
+
+        ''' Build album (idem as playlist, but with more metada) '''
+        album = Album(
+            artists=[artist],
+            date=channel_data['updated'],
+            images=[channel_data['image']],
+            name=channel_data['title'],
+            uri='somafm:channel:/%s' % (channel_name))
+
+        ''' PLS is a track '''
+        if sfmtype == 'channel':
+            tracks = []
+            for pls in channel_data['pls']:
+                track = Track(
                     artists=[artist],
-                    date=channel_data['updated'],
-                    images=[channel_data['image']],
-                    name=channel_data['title'],
-                    uri=uri)
+                    album=album,
+                    genre=channel_data['genre'],
+                    name=channel_data['pls'][pls]['name'],
+                    uri=channel_data['pls'][pls]['uri']
+                    )
+                tracks.append(track)
+            return tracks
+        elif sfmtype == 'pls':
+            return [Track(
+                artists=[artist],
+                album=album,
+                genre=channel_data['genre'],
+                name=channel_data['pls'][pls_name]['name'],
+                uri='somafm:track:/%s/%s' % (channel_name, pls_name)
+                )]
+        else:
+            return [Track(
+                artists=[artist],
+                album=album,
+                genre=channel_data['genre'],
+                name=channel_data['pls'][pls_name]['name'],
+                uri=channel_data['pls'][pls_name]['uri']
+                )]
 
-                ''' PLS is a track '''
-                tracks = []
-                for pls in channel_data['pls']:
-                    track = Track(
-                        artists=[artist],
-                        album=album,
-                        genre=channel_data['genre'],
-                        name=channel_data['pls'][pls]['name'],
-                        uri=channel_data['pls'][pls]['uri']
-                        )
-                    tracks.append(track)
-                return tracks
-        return None
+    def browse(self, uri):
+        result = []
+
+        sfmtype, path = parse_uri(uri)
+        if sfmtype is None:
+            logger.debug('Unknown URI: %s' % (uri))
+            return result
+        if sfmtype not in ('channel', 'root'):
+            logger.debug('Unmanaged type: %s' % (sfmtype))
+            return result
+
+        if sfmtype == 'root':
+            for channel in self.backend.somafm.channels:
+                result.append(Ref.directory(
+                    uri='somafm:channel:/%s' % (channel),
+                    name=self.backend.somafm.channels[channel]['title']
+                    ))
+
+        elif sfmtype == 'channel':
+            channel_data = self.backend.somafm.channels[path]
+            for pls in channel_data['pls']:
+                pls_data = channel_data['pls'][pls]
+                result.append(Ref.track(
+                    uri='somafm:pls:/%s/%s' % (path, pls),
+                    name=pls_data['name']
+                    ))
+
+        result.sort(key=lambda ref: ref.name)
+        return result
