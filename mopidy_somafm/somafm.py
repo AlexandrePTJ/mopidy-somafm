@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import datetime
+from datetime import datetime
 import logging
 import requests
 import urlparse
@@ -50,9 +50,9 @@ class SomaFMClient(object):
 
         for child_channel in root:
 
-            playlist_name = child_channel.attrib['id']
+            pls_id = child_channel.attrib['id']
 
-            self.channels[playlist_name] = {}
+            self.channels[pls_id] = {}
             pls = {}
 
             for child_detail in child_channel:
@@ -61,18 +61,18 @@ class SomaFMClient(object):
                 val = child_detail.text
 
                 if key in ['title', 'image', 'dj', 'genre']:
-                    self.channels[playlist_name][key] = val
+                    self.channels[pls_id][key] = val
                 elif key == 'updated':
-                    self.channels[playlist_name]['updated'] = datetime.datetime.fromtimestamp(
+                    self.channels[pls_id]['updated'] = datetime.fromtimestamp(
                         int(val)).strftime("%Y-%m-%d")
                 elif 'pls' in key:
                     pls[key] = {}
                     pls[key]['format'] = child_detail.attrib['format']
                     pls[key]['uri'] = val
-                    # extract pls file name without extension to create album name
+                    # extract filename without extension to create album name
                     pls[key]['name'] = val[val.rfind('/') + 1:val.rfind('.')]
 
-            self.channels[playlist_name]['pls'] = pls
+            self.channels[pls_id]['pls'] = pls
 
     def _downloadContent(self, url):
         try:
