@@ -128,10 +128,10 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
 
         channel_data = self.backend.somafm.channels[channel_name]
 
-        ''' Artists '''
+        # Artists
         artist = Artist(name=channel_data['dj'])
 
-        ''' Build album (idem as playlist, but with more metada) '''
+        # Build album (idem as playlist, but with more metada)
         album = Album(
             artists=[artist],
             date=channel_data['updated'],
@@ -139,7 +139,7 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
             name=channel_data['title'],
             uri='somafm:channel:/%s' % (channel_name))
 
-        ''' PLS is a track '''
+        # PLS is a track
         if sfmtype == 'channel':
             tracks = []
             for pls in channel_data['pls']:
