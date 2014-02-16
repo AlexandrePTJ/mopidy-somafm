@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v0.4.0 (UNRELEASED)
+v0.4.0 (2014-02-16)
 -------------------
 
 - Add browse support for LibraryController
