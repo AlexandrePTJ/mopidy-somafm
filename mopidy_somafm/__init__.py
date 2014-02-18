@@ -4,7 +4,7 @@ import os
 
 from mopidy import config, ext
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 class Extension(ext.Extension):
@@ -19,6 +19,8 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
+        schema['format'] = config.String(choices=('aac', 'mp3'))
+        schema['quality'] = config.String(choices=('highest', 'fast', 'slow', 'firewall'))
         return schema
 
     def validate_environment(self):

@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v0.5.0 (UNRELEASED)
+-------------------
+
+- #5: Select prefered quality and format from config
+
+
 v0.4.0 (2014-02-16)
 -------------------
 

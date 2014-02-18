@@ -28,18 +28,18 @@ Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
 Configuration
 =============
 
-The extension is enabled by default when installed and does not require any
-configuration.
-
 The extension requires that the Mopidy-Stream extension is enabled. It is
 bundled with Mopidy and enabled by default, so it will be available unless
 you've explicitly disabled it.
 
-If you want to disable the extension, add the following to your Mopidy
-configuration file::
+You may change prefered quality and format in your Mopidy configuration file::
 
     [somafm]
-    enabled = false
+    format = aac
+    quality = highest
+
+- `format`_ must be either `aac`_ or `mp3`_
+- `quality`_ must be one of this value:: `highest, fast, slow, firewall`_
 
 
 Project resources
