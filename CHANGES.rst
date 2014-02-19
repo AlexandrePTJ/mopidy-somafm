@@ -5,6 +5,7 @@ v0.5.0 (UNRELEASED)
 -------------------
 
 - #5: Select prefered quality and format from config
+- Add tests and Travis-CI support
 
 
 v0.4.0 (2014-02-16)
