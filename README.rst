@@ -10,12 +10,12 @@ Mopidy-SomaFM
     :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/alexandreptj/mopidy-somafm.png?branch=master
+.. image:: https://travis-ci.org/alexandreptj/mopidy-somafm.png?branch=develop
     :target: https://travis-ci.org/alexandreptj/mopidy-somafm
     :alt: Travis CI build status
 
-.. image:: https://coveralls.io/repos/alexandreptj/mopidy-somafm/badge.png?branch=master
-   :target: https://coveralls.io/r/alexandreptj/mopidy-somafm?branch=master
+.. image:: https://coveralls.io/repos/alexandreptj/mopidy-somafm/badge.png?branch=develop
+   :target: https://coveralls.io/r/alexandreptj/mopidy-somafm?branch=develop
    :alt: Test coverage
 
 `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
@@ -46,8 +46,8 @@ You may change prefered quality and format in your Mopidy configuration file::
     format = aac
     quality = highest
 
-- `format` must be either `aac` or `mp3`
-- `quality` must be one of this value:: `highest, fast, slow, firewall`
+- ``format`` must be either ``aac`` or ``mp3``
+- ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
 
 
 Project resources
