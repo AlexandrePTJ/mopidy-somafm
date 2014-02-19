@@ -42,10 +42,8 @@ class SomaFMClient(object):
         # adjust filter params to real strings
         if encoding == 'aac':
             encodings = ('aac', 'aacp')
-        elif encoding == 'mp3':
-            encodings = ('mp3')
         else:
-            encodings = ()
+            encodings = ('mp3')
 
         plsquality = quality
         if plsquality != 'firewall':

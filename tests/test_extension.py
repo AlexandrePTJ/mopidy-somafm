@@ -22,6 +22,11 @@ class ExtensionTest(unittest.TestCase):
         self.assertIn('quality', schema)
         self.assertIn('encoding', schema)
 
+    def test_validate_environment(self):
+        ext = Extension()
+
+        self.assertEqual(ext.validate_environment(), None)
+
     def test_setup(self):
         registry = mock.Mock()
 

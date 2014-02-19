@@ -17,7 +17,7 @@ def format_proxy(scheme, username, password, hostname, port):
         if not scheme:
             scheme = "http"
         # idem with port, default at 80
-        if not port:
+        if not port or port < 0:
             port = 80
         # with authentification
         if username and password:
