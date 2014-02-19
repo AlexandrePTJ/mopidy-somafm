@@ -35,9 +35,21 @@ class SomaFMClient(object):
             r1 = urlparse.urlsplit(proxy)
             self.proxies = {r1.scheme: proxy}
 
-    def refresh(self):
+    def refresh(self, encoding, quality):
         # clean previous data
         self.channels = {}
+
+        # adjust filter params to real strings
+        if encoding == 'aac':
+            encodings = ('aac', 'aacp')
+        elif encoding == 'mp3':
+            encodings = ('mp3')
+        else:
+            encodings = ()
+
+        plsquality = quality
+        if plsquality != 'firewall':
+            plsquality += 'pls'
 
         # download channels xml file
         channels_content = self._downloadContent(self.CHANNELS_URI)
@@ -51,9 +63,8 @@ class SomaFMClient(object):
         for child_channel in root:
 
             pls_id = child_channel.attrib['id']
-
-            self.channels[pls_id] = {}
-            pls = {}
+            channel_data = {}
+            pls_data = {}
 
             for child_detail in child_channel:
 
@@ -61,18 +72,37 @@ class SomaFMClient(object):
                 val = child_detail.text
 
                 if key in ['title', 'image', 'dj', 'genre']:
-                    self.channels[pls_id][key] = val
+                    channel_data[key] = val
                 elif key == 'updated':
-                    self.channels[pls_id]['updated'] = datetime.fromtimestamp(
+                    channel_data['updated'] = datetime.fromtimestamp(
                         int(val)).strftime("%Y-%m-%d")
                 elif 'pls' in key:
-                    pls[key] = {}
-                    pls[key]['format'] = child_detail.attrib['format']
-                    pls[key]['uri'] = val
-                    # extract filename without extension to create album name
-                    pls[key]['name'] = val[val.rfind('/') + 1:val.rfind('.')]
+                    plsformat = child_detail.attrib['format']
+                    plsname = val[val.rfind('/') + 1:val.rfind('.')]
 
-            self.channels[pls_id]['pls'] = pls
+                    if key == plsquality:
+                        if plsformat in encodings:
+                            pls_data[key] = {}
+                            pls_data[key]['format'] = plsformat
+                            pls_data[key]['uri'] = val
+                            # extract extension for album name
+                            pls_data[key]['name'] = plsname
+                    # firewall playlist are fastpls+mp3 but with fw path
+                    elif (
+                            plsquality == 'firewall' and
+                            key == 'fastpls' and plsformat == 'mp3'):
+
+                        pls_data['fw'] = {}
+                        pls_data['fw']['format'] = plsformat
+                        r1 = urlparse.urlsplit(val)
+                        pls_data['fw']['uri'] = "%s://%s/%s" % (
+                            r1.scheme, r1.netloc, 'fw' + r1.path
+                            )
+                        pls_data['fw']['name'] = plsname
+
+            if len(pls_data) != 0:
+                channel_data['pls'] = pls_data
+                self.channels[pls_id] = channel_data
 
     def _downloadContent(self, url):
         try:

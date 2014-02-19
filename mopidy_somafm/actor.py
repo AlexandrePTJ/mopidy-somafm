@@ -67,6 +67,8 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
         self.playlists = SomaFMPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['somafm']
+        self.quality = config['somafm']['quality']
+        self.encoding = config['somafm']['encoding']
 
     def on_start(self):
         self.playlists.refresh()
@@ -88,7 +90,10 @@ class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
 
     def refresh(self):
         playlists = []
-        self.backend.somafm.refresh()
+        self.backend.somafm.refresh(
+            self.backend.encoding,
+            self.backend.quality
+            )
         for channel in self.backend.somafm.channels:
             playlist = Playlist(
                 uri='somafm:channel:/' + channel,
