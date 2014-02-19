@@ -10,12 +10,12 @@ Mopidy-SomaFM
     :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/alexandreptj/mopidy-somafm.png?branch=develop
-    :target: https://travis-ci.org/alexandreptj/mopidy-somafm
+.. image:: https://travis-ci.org/AlexandrePTJ/mopidy-somafm.png?branch=develop
+    :target: https://travis-ci.org/AlexandrePTJ/mopidy-somafm
     :alt: Travis CI build status
 
-.. image:: https://coveralls.io/repos/alexandreptj/mopidy-somafm/badge.png?branch=develop
-   :target: https://coveralls.io/r/alexandreptj/mopidy-somafm?branch=develop
+.. image:: https://coveralls.io/repos/AlexandrePTJ/mopidy-somafm/badge.png?branch=develop
+   :target: https://coveralls.io/r/AlexandrePTJ/mopidy-somafm?branch=develop
    :alt: Test coverage
 
 `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
