@@ -46,8 +46,8 @@ You may change prefered quality and format in your Mopidy configuration file::
     format = aac
     quality = highest
 
-- `format`_ must be either `aac`_ or `mp3`_
-- `quality`_ must be one of this value:: `highest, fast, slow, firewall`_
+- `format` must be either `aac` or `mp3`
+- `quality` must be one of this value:: `highest, fast, slow, firewall`
 
 
 Project resources
