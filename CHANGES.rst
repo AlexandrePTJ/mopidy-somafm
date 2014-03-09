@@ -1,7 +1,13 @@
 Changelog
 =========
 
-v0.5.0 (UNRELEASED)
+v0.5.1 (2014-03-09)
+-------------------
+
+- Fix doc typo
+
+
+v0.5.0 (2014-03-03)
 -------------------
 
 - #5: Select prefered quality and format from config
