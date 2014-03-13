@@ -171,7 +171,8 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
                 album=album,
                 genre=channel_data['genre'],
                 name=channel_data['pls'][pls_name]['name'],
-                uri=channel_data['pls'][pls_name]['uri']
+                uri=self.backend.somafm.extractStreamUrlFromPls(
+                    channel_data['pls'][pls_name]['uri'])
                 )]
 
     def browse(self, uri):

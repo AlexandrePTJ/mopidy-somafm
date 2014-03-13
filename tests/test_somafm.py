@@ -29,3 +29,10 @@ class SomaFMClientTest(unittest.TestCase):
         sfmc = SomaFMClient()
         data = sfmc._downloadContent(url)
         self.assertIsNone(data)
+
+    def test_extractStreamUrlFromPls(self):
+        url = "http://somafm.com/groovesalad.pls"
+        sfmc = SomaFMClient()
+        data = sfmc._downloadContent(url)
+        self.assertNotEqual(len(data), 0)
+        self.assertNotEqual(data, url)

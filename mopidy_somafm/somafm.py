@@ -7,6 +7,7 @@ from datetime import datetime
 import logging
 import requests
 import urlparse
+import re
 
 try:
     import xml.etree.cElementTree as ET
@@ -101,6 +102,25 @@ class SomaFMClient(object):
             if len(pls_data) != 0:
                 channel_data['pls'] = pls_data
                 self.channels[pls_id] = channel_data
+
+    def extractStreamUrlFromPls(self, pls_uri):
+        pls_content = self._downloadContent(pls_uri)
+        if pls_content is None:
+            logger.error('Cannot fetch %s' % (pls_uri))
+            return pls_uri
+
+        # try to find FileX=<stream url>
+        try:
+            m = re.search(
+                r"^(File\d)=(?P<stream_url>\S+)",
+                pls_content, re.M)
+            if m:
+                return m.group("stream_url")
+            else:
+                return pls_uri
+        except:
+            return pls_uri
+
 
     def _downloadContent(self, url):
         try:
