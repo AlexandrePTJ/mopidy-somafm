@@ -121,7 +121,6 @@ class SomaFMClient(object):
         except:
             return pls_uri
 
-
     def _downloadContent(self, url):
         try:
             r = requests.get(url, proxies=self.proxies)
