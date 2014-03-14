@@ -40,13 +40,13 @@ The extension requires that the Mopidy-Stream extension is enabled. It is
 bundled with Mopidy and enabled by default, so it will be available unless
 you've explicitly disabled it.
 
-You may change prefered quality and format in your Mopidy configuration file::
+You may change prefered quality and encoding in your Mopidy configuration file::
 
     [somafm]
-    format = aac
+    encoding = aac
     quality = highest
 
-- ``format`` must be either ``aac`` or ``mp3``
+- ``encoding`` must be either ``aac`` or ``mp3``
 - ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
 
 
