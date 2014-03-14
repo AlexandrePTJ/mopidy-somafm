@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v0.6.0 (UNRELEASED)
+-------------------
+
+- Directly show PLS in browser
+- Add precision about 'quality' and 'encoding' couple
+
+
 v0.5.1 (2014-03-09)
 -------------------
 
