@@ -40,12 +40,7 @@ class SomaFMClient(object):
         # clean previous data
         self.channels = {}
 
-        # adjust filter params to real strings
-        if encoding == 'aac':
-            encodings = ('aac', 'aacp')
-        else:
-            encodings = ('mp3')
-
+        # adjust quality real name
         plsquality = quality
         if plsquality != 'firewall':
             plsquality += 'pls'
@@ -63,7 +58,6 @@ class SomaFMClient(object):
 
             pls_id = child_channel.attrib['id']
             channel_data = {}
-            pls_data = {}
 
             for child_detail in child_channel:
 
@@ -77,30 +71,19 @@ class SomaFMClient(object):
                         int(val)).strftime("%Y-%m-%d")
                 elif 'pls' in key:
                     plsformat = child_detail.attrib['format']
-                    plsname = val[val.rfind('/') + 1:val.rfind('.')]
 
-                    if key == plsquality:
-                        if plsformat in encodings:
-                            pls_data[key] = {}
-                            pls_data[key]['format'] = plsformat
-                            pls_data[key]['uri'] = val
-                            # extract extension for album name
-                            pls_data[key]['name'] = plsname
+                    if (key == plsquality and plsformat == encoding):
+                        channel_data['pls'] = val
                     # firewall playlist are fastpls+mp3 but with fw path
                     elif (
                             plsquality == 'firewall' and
                             key == 'fastpls' and plsformat == 'mp3'):
-
-                        pls_data['fw'] = {}
-                        pls_data['fw']['format'] = plsformat
                         r1 = urlparse.urlsplit(val)
-                        pls_data['fw']['uri'] = "%s://%s/%s" % (
+                        channel_data['pls'] = "%s://%s/%s" % (
                             r1.scheme, r1.netloc, 'fw' + r1.path
                             )
-                        pls_data['fw']['name'] = plsname
 
-            if len(pls_data) != 0:
-                channel_data['pls'] = pls_data
+            if 'pls' in channel_data:
                 self.channels[pls_id] = channel_data
 
     def extractStreamUrlFromPls(self, pls_uri):
