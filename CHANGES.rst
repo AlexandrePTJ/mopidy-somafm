@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v0.6.0 (UNRELEASED)
+v0.6.0 (2014-03-15)
 -------------------
 
 - Directly show PLS in browser
