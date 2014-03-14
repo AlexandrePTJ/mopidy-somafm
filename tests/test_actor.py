@@ -1,6 +1,6 @@
 import unittest
 
-from mopidy_somafm.actor import format_proxy, parse_uri
+from mopidy_somafm.actor import format_proxy
 
 
 class ActorTest(unittest.TestCase):
@@ -30,19 +30,3 @@ class ActorTest(unittest.TestCase):
         self.assertEqual(format_proxy(
             '', '', '', 'proxy.lan', 8080
             ), 'http://proxy.lan:8080')
-
-    def test_parse_uri(self):
-        self.assertEqual(parse_uri(
-            ''), (None, None))
-        self.assertEqual(parse_uri(
-            'mopidy'), (None, None))
-        self.assertEqual(parse_uri(
-            'mopidy:channel'), (None, None))
-        self.assertEqual(parse_uri(
-            'somafm:nothing'), ('nothing', ''))
-        self.assertEqual(parse_uri(
-            'somafm:channel:'), ('channel', ''))
-        self.assertEqual(parse_uri(
-            'somafm:channel:/path'), ('channel', 'path'))
-        self.assertEqual(parse_uri(
-            'somafm:chan:/path/extended'), ('chan', 'path/extended'))
