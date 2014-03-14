@@ -50,6 +50,14 @@ You may change prefered quality and encoding in your Mopidy configuration file::
 - ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
 
 
+Warning
+=======
+
+SomaFM do not provide every possible combinaison of ``encoding`` and ``quality``.
+
+In example, on the date of 2014/03/15, ``mp3 + highest`` gives only 3 playlists while ``aac + highest`` gives 14 and ``mp3 + highest`` gives 29.
+
+
 Project resources
 =================
 
