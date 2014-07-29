@@ -1,7 +1,5 @@
 *.py[cod]
-
-# C extensions
-*.so
+*.swp
 
 # Packages
 *.egg
@@ -18,22 +16,15 @@ develop-eggs
 lib
 lib64
 include
+MANIFEST
 
 # Installer logs
 pip-log.txt
 
 # Unit test / coverage reports
 .coverage
-.tox
+.tox/
 nosetests.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
 
 # Sublime Text
 *.sublime*

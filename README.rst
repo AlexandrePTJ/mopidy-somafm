@@ -2,21 +2,22 @@
 Mopidy-SomaFM
 *************
 
-.. image:: https://pypip.in/v/Mopidy-SomaFM/badge.png
+.. image:: https://img.shields.io/pypi/v/Mopidy-SomaFM.svg?style=flat
     :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/d/Mopidy-SomaFM/badge.png
+.. image:: https://img.shields.io/pypi/dm/Mopidy-SomaFM.svg?style=flat
     :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/AlexandrePTJ/mopidy-somafm.png?branch=master
+.. image:: https://img.shields.io/travis/AlexandrePTJ/mopidy-somafm/master.png?style=flat
     :target: https://travis-ci.org/AlexandrePTJ/mopidy-somafm
     :alt: Travis CI build status
 
-.. image:: https://coveralls.io/repos/AlexandrePTJ/mopidy-somafm/badge.png?branch=master
+.. image:: https://img.shields.io/coveralls/AlexandrePTJ/mopidy-somafm/master.svg?style=flat
    :target: https://coveralls.io/r/AlexandrePTJ/mopidy-somafm?branch=master
    :alt: Test coverage
+
 
 `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
 `SomaFM <http://somafm.com/>`_.

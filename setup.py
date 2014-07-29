@@ -18,11 +18,10 @@ setup(
     author='Alexandre Petitjean',
     author_email='alpetitjean@gmail.com',
     description='SomaFM extension for Mopidy',
-    long_description=
-        open('README.rst').read() +
-        "\n\n" +
-        open('CHANGES.rst').read(),
-    packages=find_packages(),
+    long_description="%s\n\n%s" % (
+        open('README.rst').read(),
+        open('CHANGES.rst').read()),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
     include_package_data=True,
     install_requires=[
@@ -30,6 +29,11 @@ setup(
         'Mopidy >= 0.18',
         'Pykka >= 1.1',
         'requests'
+    ],
+    test_suite='nose.collector',
+    tests_require=[
+        'nose',
+        'mock >= 1.0',
     ],
     entry_points={
         'mopidy.ext': [
