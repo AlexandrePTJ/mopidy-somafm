@@ -16,11 +16,11 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-'''
-    Channels are playlist and Album
-    PLS are tracks
-    PLS contents for internal use
-'''
+#
+#  Channels are playlist and Album
+#  PLS are tracks
+#  PLS contents for internal use
+#
 
 
 class SomaFMClient(object):
@@ -80,11 +80,12 @@ class SomaFMClient(object):
                             key == 'fastpls' and plsformat == 'mp3'):
                         r1 = urlparse.urlsplit(val)
                         channel_data['pls'] = "%s://%s/%s" % (
-                            r1.scheme, r1.netloc, 'fw' + r1.path
-                            )
+                            r1.scheme, r1.netloc, 'fw' + r1.path)
 
             if 'pls' in channel_data:
                 self.channels[pls_id] = channel_data
+
+        logger.info('Loaded %i SomaFM channels' % (len(self.channels)))
 
     def extractStreamUrlFromPls(self, pls_uri):
         pls_content = self._downloadContent(pls_uri)

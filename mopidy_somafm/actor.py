@@ -4,7 +4,7 @@ import logging
 import pykka
 
 from mopidy import backend
-from mopidy.models import Playlist, Album, Track, Artist, Ref
+from mopidy.models import Album, Track, Artist, Ref
 from .somafm import SomaFMClient
 
 logger = logging.getLogger(__name__)
@@ -44,48 +44,13 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
         self.somafm = SomaFMClient(proxy=full_proxy)
         self.library = SomaFMLibraryProvider(backend=self)
-        self.playlists = SomaFMPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['somafm']
         self.quality = config['somafm']['quality']
         self.encoding = config['somafm']['encoding']
 
     def on_start(self):
-        self.playlists.refresh()
-
-
-class SomaFMPlaylistsProvider(backend.PlaylistsProvider):
-
-    def create(self, name):
-        pass
-
-    def delete(self, name):
-        pass
-
-    def lookup(self, uri):
-        for playlist in self.playlists:
-            if playlist.uri == uri:
-                tracks = self.backend.library.lookup(uri)
-                return playlist.copy(tracks=tracks)
-
-    def refresh(self):
-        playlists = []
-        self.backend.somafm.refresh(
-            self.backend.encoding,
-            self.backend.quality
-            )
-        for channel in self.backend.somafm.channels:
-            playlist = Playlist(
-                uri='somafm:channel:/' + channel,
-                name=self.backend.somafm.channels[channel]['title'])
-            playlists.append(playlist)
-
-        self.playlists = playlists
-        logger.info('Loaded %i SomaFM playlists' % (len(self.playlists)))
-        backend.BackendListener.send('playlists_loaded')
-
-    def save(self):
-        pass
+        self.somafm.refresh(self.encoding, self.quality)
 
 
 class SomaFMLibraryProvider(backend.LibraryProvider):
