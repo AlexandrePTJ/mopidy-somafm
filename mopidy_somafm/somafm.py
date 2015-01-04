@@ -116,15 +116,15 @@ class SomaFMClient(object):
                     url, r.status_code)
                 return None
 
-        except requests.exceptions.RequestException, e:
+        except requests.exceptions.RequestException as e:
             logger.error("SomaFM RequestException: %s", e)
-        except requests.exceptions.ConnectionError, e:
+        except requests.exceptions.ConnectionError as e:
             logger.error("SomaFM ConnectionError: %s", e)
-        except requests.exceptions.URLRequired, e:
+        except requests.exceptions.URLRequired as e:
             logger.error("SomaFM URLRequired: %s", e)
-        except requests.exceptions.TooManyRedirects, e:
+        except requests.exceptions.TooManyRedirects as e:
             logger.error("SomaFM TooManyRedirects: %s", e)
-        except Exception, e:
+        except Exception as e:
             logger.error("SomaFM exception: %s", e)
         else:
             return r.text
