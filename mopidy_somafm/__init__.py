@@ -4,7 +4,7 @@ import os
 
 from mopidy import config, ext
 
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 
 
 class Extension(ext.Extension):
@@ -19,7 +19,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        schema['encoding'] = config.String(choices=('aac', 'mp3'))
+        schema['encoding'] = config.String(choices=('aac', 'mp3', 'aacp'))
         schema['quality'] = config.String(
             choices=('highest', 'fast', 'slow', 'firewall'))
         return schema

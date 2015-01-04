@@ -47,7 +47,7 @@ You may change prefered quality and encoding in your Mopidy configuration file::
     encoding = aac
     quality = highest
 
-- ``encoding`` must be either ``aac`` or ``mp3``
+- ``encoding`` must be either ``aac``, ``mp3`` or ``aacp``
 - ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
 
 
