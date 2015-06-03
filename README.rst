@@ -54,11 +54,11 @@ You may change prefered quality and encoding in your Mopidy configuration file::
 Warning
 =======
 
-SomaFM do not provide every possible combination of ``encoding`` and ``quality``.
+SomaFM does not provide every possible combination of ``encoding`` and ``quality``.
 
-In example, on the date of 2015/06/03, ``mp3 + highest`` gives only 3 playlists while ``aac + highest`` gives 15 and ``mp3 + fast`` gives 30. 
+For example, as of 2015/06/03, ``mp3 + highest`` gives only 3 playlists while ``aac + highest`` gives 15 and ``mp3 + fast`` gives 30.
 
-Some combination are incompatible and will gives 0 playlist: ``aacp + highest`` and ``aac + fast``.
+Some combination are incompatible and will give zero playlist: ``aacp + highest`` and ``aac + fast``.
 
 
 Project resources
