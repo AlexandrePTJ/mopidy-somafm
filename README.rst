@@ -58,7 +58,7 @@ SomaFM does not provide every possible combination of ``encoding`` and ``quality
 
 For example, as of 2015/06/03, ``mp3 + highest`` gives only 3 playlists while ``aac + highest`` gives 15 and ``mp3 + fast`` gives 30.
 
-Some combination are incompatible and will give zero playlist: ``aacp + highest`` and ``aac + fast``.
+Some combinations are incompatible and will give zero playlist: ``aacp + highest`` and ``aac + fast``.
 
 
 Project resources
