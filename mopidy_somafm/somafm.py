@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class SomaFMClient(object):
 
-    CHANNELS_URI = "http://api.somafm.com/channels.xml"
+    CHANNELS_URI = "https://api.somafm.com/channels.xml"
     channels = {}
     proxies = None
 
