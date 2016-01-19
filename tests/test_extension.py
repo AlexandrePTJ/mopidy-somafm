@@ -17,5 +17,5 @@ def test_get_config_schema():
 
     schema = ext.get_config_schema()
 
-    self.assertIn('quality', schema)
-    self.assertIn('encoding', schema)
+    assert 'quality' in schema
+    assert 'encoding' in schema
