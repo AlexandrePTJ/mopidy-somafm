@@ -1,4 +1,3 @@
-import mock
 import unittest
 
 from mopidy_somafm import Extension, actor as backend_lib
@@ -26,12 +25,3 @@ class ExtensionTest(unittest.TestCase):
         ext = Extension()
 
         self.assertEqual(ext.validate_environment(), None)
-
-    def test_setup(self):
-        registry = mock.Mock()
-
-        ext = Extension()
-        ext.setup(registry)
-
-        registry.add.assert_called_once_with(
-            'backend', backend_lib.SomaFMBackend)
