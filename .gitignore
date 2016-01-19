@@ -18,16 +18,15 @@ lib64
 include
 MANIFEST
 
-# Installer logs
+# pip
 pip-log.txt
+pip-selfcheck.json
 
 # Unit test / coverage reports
+.cache/
 .coverage
 .tox/
 nosetests.xml
-
-# Sublime Text
-*.sublime*
 
 #
 channels.xml

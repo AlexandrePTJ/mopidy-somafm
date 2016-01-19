@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
-import pykka
-
 from mopidy import backend
-from mopidy.models import Album, Track, Artist, Ref
+from mopidy.models import Album, Artist, Ref, Track
+import pykka
+import mopidy_somafm
 from .somafm import SomaFMClient
 
-import mopidy_somafm
 
 logger = logging.getLogger(__name__)
 

@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 
-from datetime import datetime
 import logging
+import re
 import requests
 import urlparse
-import re
+from datetime import datetime
 
 try:
     import xml.etree.cElementTree as ET
