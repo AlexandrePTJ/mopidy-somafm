@@ -1,37 +1,21 @@
-import mock
-import unittest
+from __future__ import unicode_literals
 
-from mopidy_somafm import Extension, actor as backend_lib
+from mopidy_somafm import Extension
 
 
-class ExtensionTest(unittest.TestCase):
+def test_get_default_config():
+    ext = Extension()
 
-    def test_get_default_config(self):
-        ext = Extension()
+    config = ext.get_default_config()
 
-        config = ext.get_default_config()
+    assert '[somafm]' in config
+    assert 'enabled = true' in config
 
-        self.assertIn('[somafm]', config)
-        self.assertIn('enabled = True', config)
 
-    def test_get_config_schema(self):
-        ext = Extension()
+def test_get_config_schema():
+    ext = Extension()
 
-        schema = ext.get_config_schema()
+    schema = ext.get_config_schema()
 
-        self.assertIn('quality', schema)
-        self.assertIn('encoding', schema)
-
-    def test_validate_environment(self):
-        ext = Extension()
-
-        self.assertEqual(ext.validate_environment(), None)
-
-    def test_setup(self):
-        registry = mock.Mock()
-
-        ext = Extension()
-        ext.setup(registry)
-
-        registry.add.assert_called_once_with(
-            'backend', backend_lib.SomaFMBackend)
+    assert 'quality' in schema
+    assert 'encoding' in schema

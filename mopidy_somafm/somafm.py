@@ -3,16 +3,19 @@
 
 from __future__ import unicode_literals
 
-from datetime import datetime
 import logging
+import re
 import requests
 import urlparse
-import re
+from datetime import datetime
 
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
+
+from mopidy import httpclient
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +30,18 @@ class SomaFMClient(object):
 
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
     channels = {}
-    proxies = None
 
-    def __init__(self, proxy=None):
+    def __init__(self, proxy_config=None, user_agent=None):
         super(SomaFMClient, self).__init__()
 
-        if proxy is not None:
-            r1 = urlparse.urlsplit(proxy)
-            self.proxies = {r1.scheme: proxy}
+        # Build requests session
+        self.session = requests.Session()
+        if proxy_config is not None:
+            proxy = httpclient.format_proxy(proxy_config)
+            self.session.proxies.update({'http': proxy, 'https': proxy})
+
+        full_user_agent = httpclient.format_user_agent(user_agent)
+        self.session.headers.update({'user-agent': full_user_agent})
 
     def refresh(self, encoding, quality):
         # clean previous data
@@ -107,7 +114,7 @@ class SomaFMClient(object):
 
     def _downloadContent(self, url):
         try:
-            r = requests.get(url, proxies=self.proxies)
+            r = self.session.get(url)
             logger.debug("Get %s : %i", url, r.status_code)
 
             if r.status_code is not 200:

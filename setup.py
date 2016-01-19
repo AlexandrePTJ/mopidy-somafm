@@ -26,14 +26,9 @@ setup(
     include_package_data=True,
     install_requires=[
         'setuptools',
-        'Mopidy >= 0.18',
+        'Mopidy >= 1.1',
         'Pykka >= 1.1',
-        'requests'
-    ],
-    test_suite='nose.collector',
-    tests_require=[
-        'nose',
-        'mock >= 1.0',
+        'requests >= 2.0.0'
     ],
     entry_points={
         'mopidy.ext': [
