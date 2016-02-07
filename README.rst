@@ -26,12 +26,22 @@ Mopidy-SomaFM
 Installation
 ============
 
+
+Debian/Ubuntu
+-------------
+
+This package is available from `apt.mopidy.com <http://apt.mopidy.com/>`_.
+
+This can be installed by running::
+
+    sudo apt-get install mopidy-somafm
+
+Other
+-----
+
 Install by running::
 
     pip install Mopidy-SomaFM
-
-Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-<http://apt.mopidy.com/>`_.
 
 
 Configuration
