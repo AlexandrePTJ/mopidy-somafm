@@ -51,7 +51,6 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         # Build album (idem as playlist, but with more metada)
         album = Album(
             artists=[artist],
-            date=channel_data['updated'],
             images=[channel_data['image']],
             name=channel_data['title'],
             uri='somafm:channel:/%s' % (channel_name))
@@ -59,6 +58,7 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         track = Track(
             artists=[artist],
             album=album,
+            last_modified=channel_data['updated'],
             comment=channel_data['description'],
             genre=channel_data['genre'],
             name=channel_data['title'],
