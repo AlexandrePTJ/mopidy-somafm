@@ -77,5 +77,5 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
                 name=self.backend.somafm.channels[channel]['title']
                 ))
 
-        result.sort(key=lambda ref: ref.name)
+        result.sort(key=lambda ref: ref.name.lower())
         return result
