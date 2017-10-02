@@ -26,6 +26,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
         self.uri_schemes = ['somafm']
         self.quality = config['somafm']['quality']
         self.encoding = config['somafm']['encoding']
+        self.dj_as_artist = config['somafm']['dj_as_artist']
 
     def on_start(self):
         self.somafm.refresh(self.encoding, self.quality)
@@ -46,7 +47,10 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         channel_data = self.backend.somafm.channels[channel_name]
 
         # Artists
-        artist = Artist(name=channel_data['dj'])
+        if self.backend.dj_as_artist:
+            artist = Artist(name=channel_data['dj'])
+        else:
+            artist = Artist()
 
         # Build album (idem as playlist, but with more metada)
         album = Album(
