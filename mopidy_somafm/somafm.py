@@ -73,7 +73,7 @@ class SomaFMClient(object):
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj', 'genre']:
+                if key in ['title', 'image', 'dj', 'genre', 'description']:
                     channel_data[key] = val
                 elif key == 'updated':
                     channel_data['updated'] = datetime.fromtimestamp(

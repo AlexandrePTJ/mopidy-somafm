@@ -59,6 +59,7 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         track = Track(
             artists=[artist],
             album=album,
+            comment=channel_data['description'],
             genre=channel_data['genre'],
             name=channel_data['title'],
             uri=channel_data['pls'])
