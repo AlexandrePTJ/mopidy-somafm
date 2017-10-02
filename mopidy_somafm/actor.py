@@ -33,7 +33,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
 class SomaFMLibraryProvider(backend.LibraryProvider):
 
-    root_directory = Ref.directory(uri='somafm:root', name='Soma FM')
+    root_directory = Ref.directory(uri='somafm:root', name='SomaFM')
 
     def lookup(self, uri):
         # Whatever the uri, it will always contains one track
