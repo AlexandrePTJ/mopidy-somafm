@@ -8,7 +8,6 @@ import re
 import requests
 import urlparse
 import collections
-from datetime import datetime
 
 try:
     import xml.etree.cElementTree as ET
@@ -73,11 +72,10 @@ class SomaFMClient(object):
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj', 'genre']:
+                if key in ['title', 'image', 'dj', 'genre', 'description']:
                     channel_data[key] = val
                 elif key == 'updated':
-                    channel_data['updated'] = datetime.fromtimestamp(
-                        int(val)).strftime("%Y-%m-%d")
+                    channel_data['updated'] = int(val)
                 elif 'pls' in key:
                     pls_quality = key[:-3]
                     pls_format = child_detail.attrib['format']

@@ -22,6 +22,7 @@ class Extension(ext.Extension):
         schema['encoding'] = config.String(choices=('aac', 'mp3', 'aacp'))
         schema['quality'] = config.String(
             choices=('highest', 'fast', 'slow', 'firewall'))
+        schema['dj_as_artist'] = config.Boolean()
         return schema
 
     def validate_environment(self):

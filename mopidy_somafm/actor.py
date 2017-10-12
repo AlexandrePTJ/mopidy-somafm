@@ -26,6 +26,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
         self.uri_schemes = ['somafm']
         self.quality = config['somafm']['quality']
         self.encoding = config['somafm']['encoding']
+        self.dj_as_artist = config['somafm']['dj_as_artist']
 
     def on_start(self):
         self.somafm.refresh(self.encoding, self.quality)
@@ -33,7 +34,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
 class SomaFMLibraryProvider(backend.LibraryProvider):
 
-    root_directory = Ref.directory(uri='somafm:root', name='Soma FM')
+    root_directory = Ref.directory(uri='somafm:root', name='SomaFM')
 
     def lookup(self, uri):
         # Whatever the uri, it will always contains one track
@@ -46,12 +47,14 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         channel_data = self.backend.somafm.channels[channel_name]
 
         # Artists
-        artist = Artist(name=channel_data['dj'])
+        if self.backend.dj_as_artist:
+            artist = Artist(name=channel_data['dj'])
+        else:
+            artist = Artist()
 
         # Build album (idem as playlist, but with more metada)
         album = Album(
             artists=[artist],
-            date=channel_data['updated'],
             images=[channel_data['image']],
             name=channel_data['title'],
             uri='somafm:channel:/%s' % (channel_name))
@@ -59,6 +62,8 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         track = Track(
             artists=[artist],
             album=album,
+            last_modified=channel_data['updated'],
+            comment=channel_data['description'],
             genre=channel_data['genre'],
             name=channel_data['title'],
             uri=channel_data['pls'])
@@ -77,5 +82,5 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
                 name=self.backend.somafm.channels[channel]['title']
                 ))
 
-        result.sort(key=lambda ref: ref.name)
+        result.sort(key=lambda ref: ref.name.lower())
         return result

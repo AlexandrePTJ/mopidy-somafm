@@ -65,6 +65,11 @@ to ``fast``. And afterwards if the preferred encoding is not available for that
 quality, it will fallback to using ``mp3``.
 It seems that all channels support the combination ``fast`` + ``mp3``
 
+You can also choose to use the channel DJ as the reported track artist (default behavior)::
+
+    [somafm]
+    dj_as_artist = true
+
 
 Project resources
 =================
