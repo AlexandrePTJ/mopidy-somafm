@@ -7,7 +7,7 @@ import logging
 import re
 import requests
 import urlparse
-from datetime import datetime
+import collections
 
 try:
     import xml.etree.cElementTree as ET
@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 class SomaFMClient(object):
 
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
+
+    # All channels seem to have this combination of quality/encoding available
+    FALLBACK_QUALITY = "fast"
+    FALLBACK_ENCODING = "mp3"
+
     channels = {}
 
     def __init__(self, proxy_config=None, user_agent=None):
@@ -47,11 +52,6 @@ class SomaFMClient(object):
         # clean previous data
         self.channels = {}
 
-        # adjust quality real name
-        plsquality = quality
-        if plsquality != 'firewall':
-            plsquality += 'pls'
-
         # download channels xml file
         channels_content = self._downloadContent(self.CHANNELS_URI)
         if channels_content is None:
@@ -65,31 +65,33 @@ class SomaFMClient(object):
 
             pls_id = child_channel.attrib['id']
             channel_data = {}
+            channel_all_pls = collections.defaultdict(dict)
 
             for child_detail in child_channel:
 
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj', 'genre']:
+                if key in ['title', 'image', 'dj', 'genre', 'description']:
                     channel_data[key] = val
                 elif key == 'updated':
-                    channel_data['updated'] = datetime.fromtimestamp(
-                        int(val)).strftime("%Y-%m-%d")
+                    channel_data['updated'] = int(val)
                 elif 'pls' in key:
-                    plsformat = child_detail.attrib['format']
+                    pls_quality = key[:-3]
+                    pls_format = child_detail.attrib['format']
 
-                    if (key == plsquality and plsformat == encoding):
-                        channel_data['pls'] = val
+                    channel_all_pls[pls_quality][pls_format] = val
+
                     # firewall playlist are fastpls+mp3 but with fw path
-                    elif (
-                            plsquality == 'firewall' and
-                            key == 'fastpls' and plsformat == 'mp3'):
+                    if pls_quality == 'fast' and pls_format == 'mp3':
                         r1 = urlparse.urlsplit(val)
-                        channel_data['pls'] = "%s://%s/%s" % (
+                        channel_all_pls['firewall']['mp3'] = "%s://%s/%s" % (
                             r1.scheme, r1.netloc, 'fw' + r1.path)
 
-            if 'pls' in channel_data:
+            channel_pls = self._choose_pls(channel_all_pls, encoding, quality)
+
+            if channel_pls is not None:
+                channel_data['pls'] = channel_pls
                 self.channels[pls_id] = channel_data
 
         logger.info('Loaded %i SomaFM channels' % (len(self.channels)))
@@ -111,6 +113,29 @@ class SomaFMClient(object):
                 return pls_uri
         except:
             return pls_uri
+
+    def _choose_pls(self, all_pls, encoding, quality):
+        if not all_pls:
+            return None
+
+        if quality in all_pls:
+            quality_pls = all_pls[quality]
+        elif self.FALLBACK_QUALITY in all_pls:
+            quality_pls = all_pls[self.FALLBACK_QUALITY]
+        else:
+            quality_pls = all_pls[next(iter(all_pls))]
+
+        if not quality_pls:
+            return None
+
+        if encoding in quality_pls:
+            pls = quality_pls[encoding]
+        elif self.FALLBACK_ENCODING in all_pls:
+            pls = quality_pls[self.FALLBACK_ENCODING]
+        else:
+            pls = quality_pls[next(iter(quality_pls))]
+
+        return pls
 
     def _downloadContent(self, url):
         try:

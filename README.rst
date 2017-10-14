@@ -26,12 +26,22 @@ Mopidy-SomaFM
 Installation
 ============
 
+
+Debian/Ubuntu
+-------------
+
+This package is available from `apt.mopidy.com <http://apt.mopidy.com/>`_.
+
+This can be installed by running::
+
+    sudo apt-get install mopidy-somafm
+
+Other
+-----
+
 Install by running::
 
     pip install Mopidy-SomaFM
-
-Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-<http://apt.mopidy.com/>`_.
 
 
 Configuration
@@ -41,7 +51,7 @@ The extension requires that the Mopidy-Stream extension is enabled. It is
 bundled with Mopidy and enabled by default, so it will be available unless
 you've explicitly disabled it.
 
-You may change prefered quality and encoding in your Mopidy configuration file::
+You may change preferred quality and encoding in your Mopidy configuration file::
 
     [somafm]
     encoding = aac
@@ -50,15 +60,15 @@ You may change prefered quality and encoding in your Mopidy configuration file::
 - ``encoding`` must be either ``aac``, ``mp3`` or ``aacp``
 - ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
 
+If the preferred quality is not available for a channel, the extension will fallback
+to ``fast``. And afterwards if the preferred encoding is not available for that
+quality, it will fallback to using ``mp3``.
+It seems that all channels support the combination ``fast`` + ``mp3``
 
-Warning
-=======
+You can also choose to use the channel DJ as the reported track artist (default behavior)::
 
-SomaFM does not provide every possible combination of ``encoding`` and ``quality``.
-
-For example, as of 2015/06/03, ``mp3 + highest`` gives only 3 playlists while ``aac + highest`` gives 15 and ``mp3 + fast`` gives 30.
-
-Some combinations are incompatible and will give zero playlist: ``aacp + highest`` and ``aac + fast``.
+    [somafm]
+    dj_as_artist = true
 
 
 Project resources
