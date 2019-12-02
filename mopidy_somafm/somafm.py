@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import logging
 import re
 import requests
-import urlparse
+from urllib.parse import urlsplit
 import collections
 
 try:
@@ -35,6 +35,7 @@ class SomaFMClient(object):
     FALLBACK_ENCODING = "mp3"
 
     channels = {}
+    images = {}
 
     def __init__(self, proxy_config=None, user_agent=None):
         super(SomaFMClient, self).__init__()
@@ -84,7 +85,7 @@ class SomaFMClient(object):
 
                     # firewall playlist are fastpls+mp3 but with fw path
                     if pls_quality == 'fast' and pls_format == 'mp3':
-                        r1 = urlparse.urlsplit(val)
+                        r1 = urlsplit(val)
                         channel_all_pls['firewall']['mp3'] = "%s://%s/%s" % (
                             r1.scheme, r1.netloc, 'fw' + r1.path)
 
@@ -93,6 +94,7 @@ class SomaFMClient(object):
             if channel_pls is not None:
                 channel_data['pls'] = channel_pls
                 self.channels[pls_id] = channel_data
+                self.images[pls_id] = channel_data['image']
 
         logger.info('Loaded %i SomaFM channels' % (len(self.channels)))
 

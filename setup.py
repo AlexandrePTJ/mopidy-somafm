@@ -26,7 +26,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'setuptools',
-        'Mopidy >= 1.1',
+        'Mopidy >= 3.0.0a3',
         'Pykka >= 1.1',
         'requests >= 2.0.0'
     ],
@@ -43,4 +43,5 @@ setup(
         'Programming Language :: Python :: 2',
         'Topic :: Multimedia :: Sound/Audio :: Players',
     ],
+    python_requires='>=3.7',
 )

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 from mopidy import backend
-from mopidy.models import Album, Artist, Ref, Track
+from mopidy.models import Album, Artist, Ref, Track, Image
 import pykka
 import mopidy_somafm
 from .somafm import SomaFMClient
@@ -55,7 +55,6 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         # Build album (idem as playlist, but with more metada)
         album = Album(
             artists=[artist],
-            images=[channel_data['image']],
             name=channel_data['title'],
             uri='somafm:channel:/%s' % (channel_name))
 
@@ -84,3 +83,16 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
 
         result.sort(key=lambda ref: ref.name.lower())
         return result
+
+    def get_images(self, uris):
+
+        images = []
+
+        for uri in uris:
+            if uri.startswith('somafm:'):
+                channel_name = uri[uri.index('/') + 1:]
+
+                image = Image(uri=self.backend.somafm.images[channel_name])
+                images.append(image)
+
+        return images
