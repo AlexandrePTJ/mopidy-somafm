@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, config, audio):
-        super(SomaFMBackend, self).__init__()
+        super().__init__()
 
         self.somafm = SomaFMClient(
             config['proxy'],
-            "%s/%s" % (
+            "{}/{}".format(
                 mopidy_somafm.Extension.dist_name,
                 mopidy_somafm.__version__))
         self.library = SomaFMLibraryProvider(backend=self)

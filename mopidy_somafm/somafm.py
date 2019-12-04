@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 #
 
 
-class SomaFMClient(object):
+class SomaFMClient:
 
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
 
@@ -33,7 +33,7 @@ class SomaFMClient(object):
     images = {}
 
     def __init__(self, proxy_config=None, user_agent=None):
-        super(SomaFMClient, self).__init__()
+        super().__init__()
 
         # Build requests session
         self.session = requests.Session()
@@ -81,7 +81,7 @@ class SomaFMClient(object):
                     # firewall playlist are fastpls+mp3 but with fw path
                     if pls_quality == 'fast' and pls_format == 'mp3':
                         r1 = urlsplit(val)
-                        channel_all_pls['firewall']['mp3'] = "%s://%s/%s" % (
+                        channel_all_pls['firewall']['mp3'] = "{}://{}/{}".format(
                             r1.scheme, r1.netloc, 'fw' + r1.path)
 
             channel_pls = self._choose_pls(channel_all_pls, encoding, quality)
@@ -139,7 +139,7 @@ class SomaFMClient(object):
             r = self.session.get(url)
             logger.debug("Get %s : %i", url, r.status_code)
 
-            if r.status_code is not 200:
+            if r.status_code != 200:
                 logger.error(
                     "SomaFM: %s is not reachable [http code:%i]",
                     url, r.status_code)
