@@ -13,7 +13,6 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 
-
 logger = logging.getLogger(__name__)
 
 #
@@ -111,7 +110,7 @@ class SomaFMClient:
                 return m.group("stream_url")
             else:
                 return pls_uri
-        except:
+        except BaseException:
             return pls_uri
 
     def _choose_pls(self, all_pls, encoding, quality):
