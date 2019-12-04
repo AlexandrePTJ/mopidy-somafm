@@ -1,15 +1,17 @@
+import collections
 import logging
 import re
-import requests
 from urllib.parse import urlsplit
-import collections
+
+import requests
+
+from mopidy import httpclient
 
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from mopidy import httpclient
 
 
 logger = logging.getLogger(__name__)

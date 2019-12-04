@@ -1,10 +1,11 @@
 import logging
-from mopidy import backend
-from mopidy.models import Album, Artist, Ref, Track, Image
-import pykka
-import mopidy_somafm
-from .somafm import SomaFMClient
 
+import mopidy_somafm
+import pykka
+from mopidy import backend
+from mopidy.models import Album, Artist, Image, Ref, Track
+
+from .somafm import SomaFMClient
 
 logger = logging.getLogger(__name__)
 
