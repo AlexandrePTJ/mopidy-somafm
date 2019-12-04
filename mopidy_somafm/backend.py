@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import logging
 from mopidy import backend
 from mopidy.models import Album, Artist, Ref, Track, Image

@@ -1,10 +1,13 @@
-from __future__ import unicode_literals
+import logging
+import pathlib
 
-import os
+import pkg_resources
 
 from mopidy import config, ext
 
-__version__ = '2.0.0'
+__version__ = pkg_resources.get_distribution("Mopidy-SomaFM").version
+
+logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
@@ -14,20 +17,16 @@ class Extension(ext.Extension):
     version = __version__
 
     def get_default_config(self):
-        conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
-        return config.read(conf_file)
+        return config.read(pathlib.Path(__file__).parent / "ext.conf")
 
     def get_config_schema(self):
-        schema = super(Extension, self).get_config_schema()
+        schema = super().get_config_schema()
         schema['encoding'] = config.String(choices=('aac', 'mp3', 'aacp'))
         schema['quality'] = config.String(
             choices=('highest', 'fast', 'slow', 'firewall'))
         schema['dj_as_artist'] = config.Boolean()
         return schema
 
-    def validate_environment(self):
-        pass
-
     def setup(self, registry):
-        from .actor import SomaFMBackend
+        from .backend import SomaFMBackend
         registry.add('backend', SomaFMBackend)
