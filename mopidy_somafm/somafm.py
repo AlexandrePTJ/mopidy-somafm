@@ -39,10 +39,10 @@ class SomaFMClient:
         self.session = requests.Session()
         if proxy_config is not None:
             proxy = httpclient.format_proxy(proxy_config)
-            self.session.proxies.update({'http': proxy, 'https': proxy})
+            self.session.proxies.update({"http": proxy, "https": proxy})
 
         full_user_agent = httpclient.format_user_agent(user_agent)
-        self.session.headers.update({'user-agent': full_user_agent})
+        self.session.headers.update({"user-agent": full_user_agent})
 
     def refresh(self, encoding, quality):
         # clean previous data
@@ -51,7 +51,7 @@ class SomaFMClient:
         # download channels xml file
         channels_content = self._downloadContent(self.CHANNELS_URI)
         if channels_content is None:
-            logger.error('Cannot fetch %s' % (self.CHANNELS_URI))
+            logger.error("Cannot fetch %s" % (self.CHANNELS_URI))
             return
 
         # parse XML
@@ -59,7 +59,7 @@ class SomaFMClient:
 
         for child_channel in root:
 
-            pls_id = child_channel.attrib['id']
+            pls_id = child_channel.attrib["id"]
             channel_data = {}
             channel_all_pls = collections.defaultdict(dict)
 
@@ -68,42 +68,43 @@ class SomaFMClient:
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj', 'genre', 'description']:
+                if key in ["title", "image", "dj", "genre", "description"]:
                     channel_data[key] = val
-                elif key == 'updated':
-                    channel_data['updated'] = int(val)
-                elif 'pls' in key:
+                elif key == "updated":
+                    channel_data["updated"] = int(val)
+                elif "pls" in key:
                     pls_quality = key[:-3]
-                    pls_format = child_detail.attrib['format']
+                    pls_format = child_detail.attrib["format"]
 
                     channel_all_pls[pls_quality][pls_format] = val
 
                     # firewall playlist are fastpls+mp3 but with fw path
-                    if pls_quality == 'fast' and pls_format == 'mp3':
+                    if pls_quality == "fast" and pls_format == "mp3":
                         r1 = urlsplit(val)
-                        channel_all_pls['firewall']['mp3'] = "{}://{}/{}".format(
-                            r1.scheme, r1.netloc, 'fw' + r1.path)
+                        channel_all_pls["firewall"][
+                            "mp3"
+                        ] = "{}://{}/{}".format(
+                            r1.scheme, r1.netloc, "fw" + r1.path
+                        )
 
             channel_pls = self._choose_pls(channel_all_pls, encoding, quality)
 
             if channel_pls is not None:
-                channel_data['pls'] = channel_pls
+                channel_data["pls"] = channel_pls
                 self.channels[pls_id] = channel_data
-                self.images[pls_id] = channel_data['image']
+                self.images[pls_id] = channel_data["image"]
 
-        logger.info('Loaded %i SomaFM channels' % (len(self.channels)))
+        logger.info("Loaded %i SomaFM channels" % (len(self.channels)))
 
     def extractStreamUrlFromPls(self, pls_uri):
         pls_content = self._downloadContent(pls_uri)
         if pls_content is None:
-            logger.error('Cannot fetch %s' % (pls_uri))
+            logger.error("Cannot fetch %s" % (pls_uri))
             return pls_uri
 
         # try to find FileX=<stream url>
         try:
-            m = re.search(
-                r"^(File\d)=(?P<stream_url>\S+)",
-                pls_content, re.M)
+            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.M)
             if m:
                 return m.group("stream_url")
             else:
@@ -142,7 +143,9 @@ class SomaFMClient:
             if r.status_code != 200:
                 logger.error(
                     "SomaFM: %s is not reachable [http code:%i]",
-                    url, r.status_code)
+                    url,
+                    r.status_code,
+                )
                 return None
 
         except requests.exceptions.RequestException as e:
