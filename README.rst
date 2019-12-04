@@ -2,25 +2,19 @@
 Mopidy-SomaFM
 *************
 
-.. image:: https://img.shields.io/pypi/v/Mopidy-SomaFM.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
+.. image:: https://img.shields.io/pypi/v/Mopidy-SomaFM
+    :target: https://pypi.org/project/Mopidy-SomaFM/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/pypi/dm/Mopidy-SomaFM.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy-SomaFM/
-    :alt: Number of PyPI downloads
+.. image:: https://img.shields.io/circleci/build/gh/AlexandrePTJ/mopidy-somafm
+    :target: https://circleci.com/gh/AlexandrePTJ/mopidy-somafm
+    :alt: CircleCI build status
 
-.. image:: https://img.shields.io/travis/AlexandrePTJ/mopidy-somafm/master.png?style=flat
-    :target: https://travis-ci.org/AlexandrePTJ/mopidy-somafm
-    :alt: Travis CI build status
+.. image:: https://img.shields.io/codecov/c/gh/AlexandrePTJ/mopidy-somafm
+    :target: https://codecov.io/gh/AlexandrePTJ/mopidy-somafm
+    :alt: Test coverage
 
-.. image:: https://img.shields.io/coveralls/AlexandrePTJ/mopidy-somafm/master.svg?style=flat
-   :target: https://coveralls.io/r/AlexandrePTJ/mopidy-somafm?branch=master
-   :alt: Test coverage
-
-
-`Mopidy <http://www.mopidy.com/>`_ extension for playing music from
-`SomaFM <http://somafm.com/>`_.
+SomaFM extension for Mopidy
 
 
 Installation
@@ -30,28 +24,19 @@ Installation
 Debian/Ubuntu
 -------------
 
-This package is available from `apt.mopidy.com <http://apt.mopidy.com/>`_.
-
-This can be installed by running::
-
-    sudo apt-get install mopidy-somafm
-
-Other
------
-
 Install by running::
 
-    pip install Mopidy-SomaFM
+    python3 -m pip install Mopidy-SomaFM
+
+Or, if available, install the Debian/Ubuntu package from
+`apt.mopidy.com <https://apt.mopidy.com/>`_.
 
 
 Configuration
 =============
 
-The extension requires that the Mopidy-Stream extension is enabled. It is
-bundled with Mopidy and enabled by default, so it will be available unless
-you've explicitly disabled it.
-
-You may change preferred quality and encoding in your Mopidy configuration file::
+Before starting Mopidy, you must add configuration for
+Mopidy-SomaFM to your Mopidy configuration file::
 
     [somafm]
     encoding = aac
@@ -76,4 +61,12 @@ Project resources
 
 - `Source code <https://github.com/AlexandrePTJ/mopidy-somafm>`_
 - `Issue tracker <https://github.com/AlexandrePTJ/mopidy-somafm/issues>`_
-- `Download development snapshot <https://github.com/AlexandrePTJ/mopidy-somafm/tarball/master#egg=Mopidy-SomaFM-dev>`_
+- `Changelog <https://github.com/AlexandrePTJ/mopidy-somafm/blob/master/CHANGELOG.rst>`_
+
+
+Credits
+=======
+
+- Original author: `Alexandre Petitjean <https://github.com/AlexandrePTJ>`__
+- Current maintainer: `Alexandre Petitjean <https://github.com/AlexandrePTJ>`__
+- `Contributors <https://github.com/AlexandrePTJ/mopidy-somafm/graphs/contributors>`_

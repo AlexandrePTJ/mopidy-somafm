@@ -1,32 +1,13 @@
-*.py[cod]
-*.swp
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-include
-MANIFEST
-
-# pip
-pip-log.txt
-pip-selfcheck.json
-
-# Unit test / coverage reports
-.cache/
-.coverage
-.tox/
-nosetests.xml
+*.pyc
+/.coverage
+/.mypy_cache/
+/.pytest_cache/
+/.tox/
+/*.egg-info
+/build/
+/dist/
+/MANIFEST
 
 #
 channels.xml
+/venv/

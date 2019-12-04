@@ -1,20 +1,16 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
+import collections
 import logging
 import re
+from urllib.parse import urlsplit
+
 import requests
-import urlparse
-import collections
+
+from mopidy import httpclient
 
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
-
-from mopidy import httpclient
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +22,7 @@ logger = logging.getLogger(__name__)
 #
 
 
-class SomaFMClient(object):
+class SomaFMClient:
 
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
 
@@ -35,18 +31,19 @@ class SomaFMClient(object):
     FALLBACK_ENCODING = "mp3"
 
     channels = {}
+    images = {}
 
     def __init__(self, proxy_config=None, user_agent=None):
-        super(SomaFMClient, self).__init__()
+        super().__init__()
 
         # Build requests session
         self.session = requests.Session()
         if proxy_config is not None:
             proxy = httpclient.format_proxy(proxy_config)
-            self.session.proxies.update({'http': proxy, 'https': proxy})
+            self.session.proxies.update({"http": proxy, "https": proxy})
 
         full_user_agent = httpclient.format_user_agent(user_agent)
-        self.session.headers.update({'user-agent': full_user_agent})
+        self.session.headers.update({"user-agent": full_user_agent})
 
     def refresh(self, encoding, quality):
         # clean previous data
@@ -55,7 +52,7 @@ class SomaFMClient(object):
         # download channels xml file
         channels_content = self._downloadContent(self.CHANNELS_URI)
         if channels_content is None:
-            logger.error('Cannot fetch %s' % (self.CHANNELS_URI))
+            logger.error("Cannot fetch %s" % (self.CHANNELS_URI))
             return
 
         # parse XML
@@ -63,7 +60,7 @@ class SomaFMClient(object):
 
         for child_channel in root:
 
-            pls_id = child_channel.attrib['id']
+            pls_id = child_channel.attrib["id"]
             channel_data = {}
             channel_all_pls = collections.defaultdict(dict)
 
@@ -72,46 +69,48 @@ class SomaFMClient(object):
                 key = child_detail.tag
                 val = child_detail.text
 
-                if key in ['title', 'image', 'dj', 'genre', 'description']:
+                if key in ["title", "image", "dj", "genre", "description"]:
                     channel_data[key] = val
-                elif key == 'updated':
-                    channel_data['updated'] = int(val)
-                elif 'pls' in key:
+                elif key == "updated":
+                    channel_data["updated"] = int(val)
+                elif "pls" in key:
                     pls_quality = key[:-3]
-                    pls_format = child_detail.attrib['format']
+                    pls_format = child_detail.attrib["format"]
 
                     channel_all_pls[pls_quality][pls_format] = val
 
                     # firewall playlist are fastpls+mp3 but with fw path
-                    if pls_quality == 'fast' and pls_format == 'mp3':
-                        r1 = urlparse.urlsplit(val)
-                        channel_all_pls['firewall']['mp3'] = "%s://%s/%s" % (
-                            r1.scheme, r1.netloc, 'fw' + r1.path)
+                    if pls_quality == "fast" and pls_format == "mp3":
+                        r1 = urlsplit(val)
+                        channel_all_pls["firewall"][
+                            "mp3"
+                        ] = "{}://{}/{}".format(
+                            r1.scheme, r1.netloc, "fw" + r1.path
+                        )
 
             channel_pls = self._choose_pls(channel_all_pls, encoding, quality)
 
             if channel_pls is not None:
-                channel_data['pls'] = channel_pls
+                channel_data["pls"] = channel_pls
                 self.channels[pls_id] = channel_data
+                self.images[pls_id] = channel_data["image"]
 
-        logger.info('Loaded %i SomaFM channels' % (len(self.channels)))
+        logger.info("Loaded %i SomaFM channels" % (len(self.channels)))
 
     def extractStreamUrlFromPls(self, pls_uri):
         pls_content = self._downloadContent(pls_uri)
         if pls_content is None:
-            logger.error('Cannot fetch %s' % (pls_uri))
+            logger.error("Cannot fetch %s" % (pls_uri))
             return pls_uri
 
         # try to find FileX=<stream url>
         try:
-            m = re.search(
-                r"^(File\d)=(?P<stream_url>\S+)",
-                pls_content, re.M)
+            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.M)
             if m:
                 return m.group("stream_url")
             else:
                 return pls_uri
-        except:
+        except BaseException:
             return pls_uri
 
     def _choose_pls(self, all_pls, encoding, quality):
@@ -142,10 +141,12 @@ class SomaFMClient(object):
             r = self.session.get(url)
             logger.debug("Get %s : %i", url, r.status_code)
 
-            if r.status_code is not 200:
+            if r.status_code != 200:
                 logger.error(
                     "SomaFM: %s is not reachable [http code:%i]",
-                    url, r.status_code)
+                    url,
+                    r.status_code,
+                )
                 return None
 
         except requests.exceptions.RequestException as e:
