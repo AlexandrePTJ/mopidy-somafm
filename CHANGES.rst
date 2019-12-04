@@ -6,15 +6,25 @@ v2.0.0rc1 (2019-12-04)
 
 - #32 Migrate to Python 3.7
 
+
+v1.1.0 (2017-10-14)
+-------------------
+
+- #24: Graceful fallback
+- #28: Various fix (DJ as artist, station ordering)
+
+
 v1.0.1 (2016-01-19)
 -------------------
 
 - Use httpclient helper from Mopidy >= 1.1
 
+
 v0.8.0 (2015-11-09)
 -------------------
 
 - #20: Replace HTTP with HTTPS for channels.xml
+
 
 v0.7.1 (2015-01-04)
 -------------------
