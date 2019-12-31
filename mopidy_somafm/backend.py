@@ -89,13 +89,13 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
 
     def get_images(self, uris):
 
-        images = []
+        images = {}
 
         for uri in uris:
             if uri.startswith("somafm:"):
                 channel_name = uri[uri.index("/") + 1 :]
 
                 image = Image(uri=self.backend.somafm.images[channel_name])
-                images.append(image)
+                images[uri] = [ image ]
 
         return images
