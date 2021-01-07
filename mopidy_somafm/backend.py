@@ -2,10 +2,11 @@ import logging
 
 import mopidy_somafm
 import pykka
-import requests, configparser, random
-from mopidy import backend
+import requests
+import configparser
+import random
+from mopidy import backend, httpclient
 from mopidy.models import Album, Artist, Image, Ref, Track
-from mopidy import httpclient
 
 from .somafm import SomaFMClient
 
@@ -102,7 +103,7 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
                 channel_name = uri[uri.index("/") + 1 :]
 
                 image = Image(uri=self.backend.somafm.images[channel_name])
-                images[uri] = [ image ]
+                images[uri] = [image]
 
         return images
 
@@ -136,5 +137,5 @@ class SomaFMPlayback(backend.PlaybackProvider):
             num = int(playlist['numberofentries'])
             return playlist['File' + str(random.randint(1, num))]
 
-        except:
+        except Exception:
             return None
