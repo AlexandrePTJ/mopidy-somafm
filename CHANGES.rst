@@ -1,6 +1,13 @@
 Changelog
 =========
 
+
+v2.0.1 (2021-01-07)
+-------------------
+
+- #37 Fix image display (Thanks to @dreamlayers and @morithil)
+
+
 v2.0.0 (2020-03-11)
 -------------------
 
