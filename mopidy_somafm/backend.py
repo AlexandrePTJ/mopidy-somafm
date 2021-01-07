@@ -21,14 +21,14 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
             mopidy_somafm.Extension.dist_name, mopidy_somafm.__version__
         )
 
-        self.somafm = SomaFMClient(
-            config["proxy"],
-            user_agent
-        )
+        self.somafm = SomaFMClient(config["proxy"], user_agent)
         self.library = SomaFMLibraryProvider(backend=self)
-        self.playback = SomaFMPlayback(audio=audio, backend=self,
-                                       proxy_config=config["proxy"],
-                                       user_agent=user_agent)
+        self.playback = SomaFMPlayback(
+            audio=audio,
+            backend=self,
+            proxy_config=config["proxy"],
+            user_agent=user_agent,
+        )
 
         self.uri_schemes = ["somafm"]
         self.quality = config["somafm"]["quality"]
@@ -109,7 +109,6 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
 
 
 class SomaFMPlayback(backend.PlaybackProvider):
-
     def __init__(self, audio, backend, proxy_config=None, user_agent=None):
         super().__init__(audio=audio, backend=backend)
 
@@ -133,9 +132,9 @@ class SomaFMPlayback(backend.PlaybackProvider):
 
             pls = configparser.ConfigParser()
             pls.read_string(r.text)
-            playlist = pls['playlist']
-            num = int(playlist['numberofentries'])
-            return playlist['File' + str(random.randint(1, num))]
+            playlist = pls["playlist"]
+            num = int(playlist["numberofentries"])
+            return playlist["File" + str(random.randint(1, num))]
 
         except Exception:
             return None
