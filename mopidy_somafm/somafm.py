@@ -22,6 +22,18 @@ logger = logging.getLogger(__name__)
 #
 
 
+def extract_somafm_channel_name_from_uri(uri):
+
+    if not uri.startswith("somafm:"):
+        return None
+
+    channel_separator = uri.find("/")
+    if channel_separator == -1:
+        return None
+
+    return uri[channel_separator + 1 :]
+
+
 class SomaFMClient:
 
     CHANNELS_URI = "https://api.somafm.com/channels.xml"

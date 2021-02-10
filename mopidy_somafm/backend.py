@@ -8,7 +8,7 @@ import random
 from mopidy import backend, httpclient
 from mopidy.models import Album, Artist, Image, Ref, Track
 
-from .somafm import SomaFMClient
+from .somafm import SomaFMClient, extract_somafm_channel_name_from_uri
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +46,10 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
     def lookup(self, uri):
         # Whatever the uri, it will always contains one track
         # which is a url to a pls
-
-        if not uri.startswith("somafm:"):
+        channel_name = extract_somafm_channel_name_from_uri(uri)
+        if channel_name is None:
             return None
 
-        channel_name = uri[uri.index("/") + 1 :]
         channel_data = self.backend.somafm.channels[channel_name]
 
         # Artists
@@ -99,9 +98,8 @@ class SomaFMLibraryProvider(backend.LibraryProvider):
         images = {}
 
         for uri in uris:
-            if uri.startswith("somafm:"):
-                channel_name = uri[uri.index("/") + 1 :]
-
+            channel_name = extract_somafm_channel_name_from_uri(uri)
+            if channel_name is not None:
                 image = Image(uri=self.backend.somafm.images[channel_name])
                 images[uri] = [image]
 
@@ -123,7 +121,10 @@ class SomaFMPlayback(backend.PlaybackProvider):
 
     def translate_uri(self, uri):
         try:
-            channel_name = uri[uri.index("/") + 1 :]
+            channel_name = extract_somafm_channel_name_from_uri(uri)
+            if channel_name is None:
+                return None
+
             channel_data = self.backend.somafm.channels.get(channel_name)
 
             r = self.session.get(channel_data["pls"])
