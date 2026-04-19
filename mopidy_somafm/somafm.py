@@ -3,7 +3,7 @@ import logging
 import re
 from urllib.parse import urlsplit
 
-import requests
+import httpx
 
 from mopidy import httpclient
 
@@ -48,14 +48,13 @@ class SomaFMClient:
     def __init__(self, proxy_config=None, user_agent=None):
         super().__init__()
 
-        # Build requests session
-        self.session = requests.Session()
-        if proxy_config is not None:
-            proxy = httpclient.format_proxy(proxy_config)
-            self.session.proxies.update({"http": proxy, "https": proxy})
-
-        full_user_agent = httpclient.format_user_agent(user_agent)
-        self.session.headers.update({"user-agent": full_user_agent})
+        # Build HTTP client
+        self.http = httpx.Client(
+            proxy=httpclient.format_proxy(proxy_config),
+            headers={
+                "user-agent": httpclient.format_user_agent(user_agent)
+            }
+        )
 
     def refresh(self, encoding, quality):
         # clean previous data
@@ -150,7 +149,7 @@ class SomaFMClient:
 
     def _downloadContent(self, url):
         try:
-            r = self.session.get(url)
+            r = self.http.get(url)
             logger.debug("Get %s : %i", url, r.status_code)
 
             if r.status_code != 200:
@@ -161,14 +160,8 @@ class SomaFMClient:
                 )
                 return None
 
-        except requests.exceptions.RequestException as e:
-            logger.error("SomaFM RequestException: %s", e)
-        except requests.exceptions.ConnectionError as e:
-            logger.error("SomaFM ConnectionError: %s", e)
-        except requests.exceptions.URLRequired as e:
-            logger.error("SomaFM URLRequired: %s", e)
-        except requests.exceptions.TooManyRedirects as e:
-            logger.error("SomaFM TooManyRedirects: %s", e)
+        except httpx.RequestError as e:
+            logger.error("SomaFM RequestError: %s", e)
         except Exception as e:
             logger.error("SomaFM exception: %s", e)
         else:
