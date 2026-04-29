@@ -1,11 +1,11 @@
 import logging
 import pathlib
 
-import pkg_resources
+from importlib.metadata import distribution
 
 from mopidy import config, ext
 
-__version__ = pkg_resources.get_distribution("Mopidy-SomaFM").version
+__version__ = distribution("Mopidy-SomaFM").version
 
 logger = logging.getLogger(__name__)
 

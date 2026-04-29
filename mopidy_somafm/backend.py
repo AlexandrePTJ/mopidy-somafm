@@ -2,7 +2,7 @@ import logging
 
 import mopidy_somafm
 import pykka
-import requests
+import httpx
 import configparser
 import random
 from mopidy import backend, httpclient
@@ -110,14 +110,13 @@ class SomaFMPlayback(backend.PlaybackProvider):
     def __init__(self, audio, backend, proxy_config=None, user_agent=None):
         super().__init__(audio=audio, backend=backend)
 
-        # Build requests session
-        self.session = requests.Session()
-        if proxy_config is not None:
-            proxy = httpclient.format_proxy(proxy_config)
-            self.session.proxies.update({"http": proxy, "https": proxy})
-
-        full_user_agent = httpclient.format_user_agent(user_agent)
-        self.session.headers.update({"user-agent": full_user_agent})
+        # Build HTTP client
+        self.http = httpx.Client(
+            proxy=httpclient.format_proxy(proxy_config),
+            headers={
+                "user-agent": httpclient.format_user_agent(user_agent)
+            }
+        )
 
     def translate_uri(self, uri):
         try:
@@ -127,7 +126,7 @@ class SomaFMPlayback(backend.PlaybackProvider):
 
             channel_data = self.backend.somafm.channels.get(channel_name)
 
-            r = self.session.get(channel_data["pls"])
+            r = self.http.get(channel_data["pls"])
             if r.status_code != 200:
                 return None
 
