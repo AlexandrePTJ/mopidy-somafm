@@ -25,7 +25,23 @@ mopidy-somafm to your Mopidy configuration file:
 
 ```ini
 [somafm]
-# TODO: Add example of extension config
+encoding = aac
+quality = highest
+```
+
+- ``encoding`` must be either ``aac``, ``mp3`` or ``aacp``
+- ``quality`` must be one of ``highest``, ``fast``, ``slow``, ``firewall``
+
+If the preferred quality is not available for a channel, the extension will fallback
+to ``fast``. And afterwards if the preferred encoding is not available for that
+quality, it will fallback to using ``mp3``.
+It seems that all channels support the combination ``fast`` + ``mp3``
+
+You can also choose to use the channel DJ as the reported track artist (default behavior)::
+
+```ini
+[somafm]
+dj_as_artist = true
 ```
 
 
