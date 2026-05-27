@@ -1,18 +1,16 @@
 import logging
 import pathlib
-
-from importlib.metadata import distribution
+from importlib.metadata import version
 
 from mopidy import config, ext
 
-__version__ = distribution("Mopidy-SomaFM").version
+__version__ = version("mopidy-somafm")
 
 logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
-
-    dist_name = "Mopidy-SomaFM"
+    dist_name = "mopidy-somafm"
     ext_name = "somafm"
     version = __version__
 
@@ -30,5 +28,4 @@ class Extension(ext.Extension):
 
     def setup(self, registry):
         from .backend import SomaFMBackend
-
         registry.add("backend", SomaFMBackend)

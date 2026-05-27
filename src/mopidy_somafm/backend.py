@@ -40,7 +40,6 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class SomaFMLibraryProvider(backend.LibraryProvider):
-
     root_directory = Ref.directory(uri="somafm:root", name="SomaFM")
 
     def lookup(self, uri):
@@ -113,9 +112,7 @@ class SomaFMPlayback(backend.PlaybackProvider):
         # Build HTTP client
         self.http = httpx.Client(
             proxy=httpclient.format_proxy(proxy_config),
-            headers={
-                "user-agent": httpclient.format_user_agent(user_agent)
-            }
+            headers={"user-agent": httpclient.format_user_agent(user_agent)},
         )
 
     def translate_uri(self, uri):

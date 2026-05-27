@@ -35,7 +35,6 @@ def extract_somafm_channel_name_from_uri(uri):
 
 
 class SomaFMClient:
-
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
 
     # All channels seem to have this combination of quality/encoding available
@@ -50,10 +49,8 @@ class SomaFMClient:
 
         # Build HTTP client
         self.http = httpx.Client(
-            proxy=httpclient.format_proxy(proxy_config),
-            headers={
-                "user-agent": httpclient.format_user_agent(user_agent)
-            }
+            # proxy=httpclient.format_proxy(proxy_config),
+            headers={"user-agent": httpclient.format_user_agent(user_agent)},
         )
 
     def refresh(self, encoding, quality):
@@ -70,13 +67,11 @@ class SomaFMClient:
         root = ET.fromstring(channels_content)
 
         for child_channel in root:
-
             pls_id = child_channel.attrib["id"]
             channel_data = {}
             channel_all_pls = collections.defaultdict(dict)
 
             for child_detail in child_channel:
-
                 key = child_detail.tag
                 val = child_detail.text
 
@@ -93,9 +88,7 @@ class SomaFMClient:
                     # firewall playlist are fastpls+mp3 but with fw path
                     if pls_quality == "fast" and pls_format == "mp3":
                         r1 = urlsplit(val)
-                        channel_all_pls["firewall"][
-                            "mp3"
-                        ] = "{}://{}/{}".format(
+                        channel_all_pls["firewall"]["mp3"] = "{}://{}/{}".format(
                             r1.scheme, r1.netloc, "fw" + r1.path
                         )
 
