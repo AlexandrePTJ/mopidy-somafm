@@ -3,12 +3,11 @@ import logging
 import re
 from urllib.parse import urlsplit
 
-import requests
-
+import httpx
 from mopidy import httpclient
 
 try:
-    import xml.etree.cElementTree as ET
+    import xml.etree.ElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
@@ -35,7 +34,6 @@ def extract_somafm_channel_name_from_uri(uri):
 
 
 class SomaFMClient:
-
     CHANNELS_URI = "https://api.somafm.com/channels.xml"
 
     # All channels seem to have this combination of quality/encoding available
@@ -48,14 +46,11 @@ class SomaFMClient:
     def __init__(self, proxy_config=None, user_agent=None):
         super().__init__()
 
-        # Build requests session
-        self.session = requests.Session()
-        if proxy_config is not None:
-            proxy = httpclient.format_proxy(proxy_config)
-            self.session.proxies.update({"http": proxy, "https": proxy})
-
-        full_user_agent = httpclient.format_user_agent(user_agent)
-        self.session.headers.update({"user-agent": full_user_agent})
+        # Build HTTP client
+        self.http = httpx.Client(
+            proxy=httpclient.format_proxy(proxy_config) if proxy_config else None,
+            headers={"user-agent": httpclient.format_user_agent(user_agent)},
+        )
 
     def refresh(self, encoding, quality):
         # clean previous data
@@ -71,13 +66,11 @@ class SomaFMClient:
         root = ET.fromstring(channels_content)
 
         for child_channel in root:
-
             pls_id = child_channel.attrib["id"]
             channel_data = {}
             channel_all_pls = collections.defaultdict(dict)
 
             for child_detail in child_channel:
-
                 key = child_detail.tag
                 val = child_detail.text
 
@@ -94,9 +87,7 @@ class SomaFMClient:
                     # firewall playlist are fastpls+mp3 but with fw path
                     if pls_quality == "fast" and pls_format == "mp3":
                         r1 = urlsplit(val)
-                        channel_all_pls["firewall"][
-                            "mp3"
-                        ] = "{}://{}/{}".format(
+                        channel_all_pls["firewall"]["mp3"] = "{}://{}/{}".format(
                             r1.scheme, r1.netloc, "fw" + r1.path
                         )
 
@@ -117,11 +108,10 @@ class SomaFMClient:
 
         # try to find FileX=<stream url>
         try:
-            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.M)
+            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.MULTILINE)
             if m:
                 return m.group("stream_url")
-            else:
-                return pls_uri
+            return pls_uri
         except BaseException:
             return pls_uri
 
@@ -150,7 +140,7 @@ class SomaFMClient:
 
     def _downloadContent(self, url):
         try:
-            r = self.session.get(url)
+            r = self.http.get(url)
             logger.debug("Get %s : %i", url, r.status_code)
 
             if r.status_code != 200:
@@ -161,14 +151,8 @@ class SomaFMClient:
                 )
                 return None
 
-        except requests.exceptions.RequestException as e:
-            logger.error("SomaFM RequestException: %s", e)
-        except requests.exceptions.ConnectionError as e:
-            logger.error("SomaFM ConnectionError: %s", e)
-        except requests.exceptions.URLRequired as e:
-            logger.error("SomaFM URLRequired: %s", e)
-        except requests.exceptions.TooManyRedirects as e:
-            logger.error("SomaFM TooManyRedirects: %s", e)
+        except httpx.RequestError as e:
+            logger.error("SomaFM RequestError: %s", e)
         except Exception as e:
             logger.error("SomaFM exception: %s", e)
         else:

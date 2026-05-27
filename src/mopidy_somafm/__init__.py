@@ -1,18 +1,16 @@
 import logging
 import pathlib
-
-import pkg_resources
+from importlib.metadata import version
 
 from mopidy import config, ext
 
-__version__ = pkg_resources.get_distribution("Mopidy-SomaFM").version
+__version__ = version("mopidy-somafm")
 
 logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
-
-    dist_name = "Mopidy-SomaFM"
+    dist_name = "mopidy-somafm"
     ext_name = "somafm"
     version = __version__
 
