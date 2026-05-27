@@ -28,4 +28,5 @@ class Extension(ext.Extension):
 
     def setup(self, registry):
         from .backend import SomaFMBackend
+
         registry.add("backend", SomaFMBackend)

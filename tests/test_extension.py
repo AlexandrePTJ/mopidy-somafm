@@ -1,5 +1,4 @@
 from mopidy_somafm import Extension
-from mopidy_somafm import backend as backend_lib
 
 
 def test_get_default_config() -> None:
@@ -16,9 +15,8 @@ def test_get_config_schema() -> None:
 
     schema = ext.get_config_schema()
 
-    # TODO Test the content of your config schema
-    # assert "username" in schema
-    # assert "password" in schema
+    assert "encoding" in schema
+    assert "quality" in schema
 
 
 # TODO Write more tests

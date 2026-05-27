@@ -1,12 +1,13 @@
-import logging
-
-import mopidy_somafm
-import pykka
-import httpx
 import configparser
+import logging
 import random
+
+import httpx
+import pykka
 from mopidy import backend, httpclient
 from mopidy.models import Album, Artist, Image, Ref, Track
+
+import mopidy_somafm
 
 from .somafm import SomaFMClient, extract_somafm_channel_name_from_uri
 
@@ -17,9 +18,7 @@ class SomaFMBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config, audio):
         super().__init__()
 
-        user_agent = "{}/{}".format(
-            mopidy_somafm.Extension.dist_name, mopidy_somafm.__version__
-        )
+        user_agent = f"{mopidy_somafm.Extension.dist_name}/{mopidy_somafm.__version__}"
 
         self.somafm = SomaFMClient(config["proxy"], user_agent)
         self.library = SomaFMLibraryProvider(backend=self)
@@ -111,7 +110,7 @@ class SomaFMPlayback(backend.PlaybackProvider):
 
         # Build HTTP client
         self.http = httpx.Client(
-            proxy=httpclient.format_proxy(proxy_config),
+            proxy=httpclient.format_proxy(proxy_config) if proxy_config else None,
             headers={"user-agent": httpclient.format_user_agent(user_agent)},
         )
 

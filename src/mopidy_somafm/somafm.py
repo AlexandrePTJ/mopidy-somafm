@@ -4,11 +4,10 @@ import re
 from urllib.parse import urlsplit
 
 import httpx
-
 from mopidy import httpclient
 
 try:
-    import xml.etree.cElementTree as ET
+    import xml.etree.ElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
@@ -49,7 +48,7 @@ class SomaFMClient:
 
         # Build HTTP client
         self.http = httpx.Client(
-            # proxy=httpclient.format_proxy(proxy_config),
+            proxy=httpclient.format_proxy(proxy_config) if proxy_config else None,
             headers={"user-agent": httpclient.format_user_agent(user_agent)},
         )
 
@@ -109,11 +108,10 @@ class SomaFMClient:
 
         # try to find FileX=<stream url>
         try:
-            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.M)
+            m = re.search(r"^(File\d)=(?P<stream_url>\S+)", pls_content, re.MULTILINE)
             if m:
                 return m.group("stream_url")
-            else:
-                return pls_uri
+            return pls_uri
         except BaseException:
             return pls_uri
 
